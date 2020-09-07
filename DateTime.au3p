@@ -1,0 +1,415 @@
+#AutoIt3Wrapper_Run_AU3Check=N
+
+#include-once
+; https://github.com/forcedotcom/dataloader/blob/master/windows-dependencies/autoit/Include/Date.au3
+#include <Date.au3>
+
+Global Const $__g_DateTime_sTsFormat = '%04d-%02d-%02d %02d:%02d:%02d.%03d'
+Global Const $__g_DateTime_sTsPattern = '^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}).(\d{3})$'
+Global Enum $__g_DateTime_ts_year, $__g_DateTime_ts_month, $__g_DateTime_ts_day, $__g_DateTime_ts_hour, $__g_DateTime_ts_minute, $__g_DateTime_ts_second, $__g_DateTime_ts_millisecond
+Global Enum $__g_DateTIme_SUNDAY = 1, $__g_DateTIme_MONDAY, $__g_DateTIme_TUESDAY, $__g_DateTIme_WEDNESDAY, $__g_DateTIme_THURSDAY, $__g_DateTIme_FRIDAY, $__g_DateTIme_SATURDAY
+
+Class DateTime
+    $ts = Null
+    $tz = Null
+
+    Get Func year()
+        Return $this.tsShards()[$__g_DateTime_ts_year]
+        Return Int(StringMid($this.ts, 1, 4), 1)
+    EndFunc
+
+    Set Func year($value)
+        Local $aShards = $this.tsShards()
+        $this.setDate($value, $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day])
+    EndFunc
+
+    Get Func month()
+        Return $this.tsShards()[$__g_DateTime_ts_month]
+        Return Int(StringMid($this.ts, 6, 2), 1)
+    EndFunc
+
+    Set Func month($value)
+        Local $aShards = $this.tsShards()
+        $this.setDate($aShards[$__g_DateTime_ts_year], $value, $aShards[$__g_DateTime_ts_day])
+    EndFunc
+
+    Get Func day()
+        Return $this.tsShards()[$__g_DateTime_ts_day]
+        Return Int(StringMid($this.ts, 9, 2), 1)
+    EndFunc
+
+    Set Func day($value)
+        Local $aShards = $this.tsShards()
+        $this.setDate($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $value)
+    EndFunc
+
+    Get Func dayOfWeek()
+        Local $aShards = $this.tsShards()
+        ;_DateDayOfWeek()
+        Return _DateToDayOfWeek($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day])
+    EndFunc
+
+    Set Func dayOfWeek()
+        ;FIXME
+    EndFunc
+
+    Get Func dayOfWeekIso()
+        ;FIXME
+    EndFunc
+
+    Set Func dayOfWeekIso()
+        ;FIXME
+    EndFunc
+
+    Get Func dayOfYear()
+        ;FIXME
+    EndFunc
+
+    Set Func dayOfYear()
+        ;FIXME
+    EndFunc
+
+    Get Func daysInMonth()
+        ;FIXME
+    EndFunc
+
+    Set Func daysInMonth()
+        ;FIXME
+    EndFunc
+
+    Get Func dst()
+        ;FIXME
+    EndFunc
+
+    Set Func dst()
+        ;FIXME
+    EndFunc
+
+    Get Func hour()
+        Return $this.tsShards()[$__g_DateTime_ts_hour]
+        Return Int(StringMid($this.ts, 12, 2), 1)
+    EndFunc
+
+    Set Func hour($value)
+        Local $aShards = $this.tsShards()
+        $this.setTime($aShards[$value, $aShards[$__g_DateTime_ts_minute], $aShards[$__g_DateTime_ts_second], $aShards[$__g_DateTime_ts_millisecond])
+    EndFunc
+
+    Get Func minute()
+        Return $this.tsShards()[$__g_DateTime_ts_minute]
+        Return Int(StringMid($this.ts, 15, 2), 1)
+    EndFunc
+
+    Set Func minute($value)
+        Local $aShards = $this.tsShards()
+        $this.setTime($aShards[$__g_DateTime_ts_hour], $value, $aShards[$__g_DateTime_ts_second], $aShards[$__g_DateTime_ts_millisecond])
+    EndFunc
+
+    Get Func second()
+        Return $this.tsShards()[$__g_DateTime_ts_second]
+        Return Int(StringMid($this.ts, 18, 2), 1)
+    EndFunc
+
+    Set Func second($value)
+        Local $aShards = $this.tsShards()
+        $this.setTime($aShards[$__g_DateTime_ts_hour], $aShards[$__g_DateTime_ts_minute], $value, $aShards[$__g_DateTime_ts_millisecond])
+    EndFunc
+
+    Get Func millisecond()
+        Return $this.tsShards()[$__g_DateTime_ts_millisecond]
+        Return Int(StringMid($this.ts, 21, 3), 1)
+    EndFunc
+
+    Set Func millisecond($value)
+        Local $aShards = $this.tsShards()
+        $this.setTime($aShards[$__g_DateTime_ts_hour], $aShards[$__g_DateTime_ts_minute], $aShards[$__g_DateTime_ts_second], $value)
+    EndFunc
+
+    Get Func timestamp()
+        ;FIXME
+    EndFunc
+
+    Set Func timestamp()
+        ;FIXME
+    EndFunc
+
+    Get Func timezone()
+        ;FIXME
+    EndFunc
+
+    Set Func timezone()
+        ;FIXME
+    EndFunc
+
+    Get Func utc()
+        ;FIXME
+    EndFunc
+
+    Set Func utc()
+        ;FIXME
+    EndFunc
+
+    Get Func weekNumberInMonth()
+        ;FIXME
+    EndFunc
+
+    Set Func weekNumberInMonth()
+        ;FIXME
+    EndFunc
+
+    Get Func weekOfMonth()
+        ;FIXME
+    EndFunc
+
+    Set Func weekOfMonth()
+        ;FIXME
+    EndFunc
+
+    Get Func weekOfYear()
+        ;FIXME
+    EndFunc
+
+    Set Func weekOfYear()
+        ;FIXME
+    EndFunc
+
+    Get Func yearIso()
+        ;FIXME
+    EndFunc
+
+    Set Func yearIso()
+        ;FIXME
+    EndFunc
+
+    Func __construct($ts = 'now')
+        ;$ts = $ts == 'now' ? _Now() : _DateTimeFormat($ts, 0)
+        $ts = $ts == 'now' ? StringFormat($__g_DateTime_sTsFormat, @YEAR, @MON, @MDAY, @HOUR, @MIN, @SEC, @MSEC) : _DateTimeFormat($ts, 0)
+
+        $this.ts = $ts
+    EndFunc
+    #cs
+    Func __destruct()
+        ; Destructor code here.
+    EndFunc
+    #ce
+    Func tsShards()
+        Return StringRegExp($this.ts, $__g_DateTime_sTsPattern, 1)
+    EndFunc
+
+    #cs
+    # @param DateInterval $value
+    #ce
+    Func add($value)
+        ;FIXME
+    EndFunc
+
+    Func addCenturies()
+        ;FIXME
+    EndFunc
+
+    Func addCentury()
+        ;FIXME
+    EndFunc
+
+    Func addDay()
+        ;FIXME
+    EndFunc
+
+    Func addDays()
+        ;FIXME
+    EndFunc
+
+    Func addHour()
+        ;FIXME
+    EndFunc
+
+    Func addHours()
+        ;FIXME
+    EndFunc
+
+    Func addMinute()
+        ;FIXME
+    EndFunc
+
+    Func addMinutes()
+        ;FIXME
+    EndFunc
+
+    Func addMonth()
+        ;FIXME
+    EndFunc
+
+    Func addMonthNoOverflow()
+        ;FIXME
+    EndFunc
+
+    Func addMonths()
+        ;FIXME
+    EndFunc
+
+    Func addMonthsNoOverflow()
+        ;FIXME
+    EndFunc
+
+    Func addMonthsWithOverflow()
+        ;FIXME
+    EndFunc
+
+    Func addMonthWithOverflow()
+        ;FIXME
+    EndFunc
+
+    Func addQuarter()
+        ;FIXME
+    EndFunc
+
+    Func addQuarters()
+        ;FIXME
+    EndFunc
+
+    Func addRealHour()
+        ;FIXME
+    EndFunc
+
+    Func addRealHours()
+        ;FIXME
+    EndFunc
+
+    Func addRealMinute()
+        ;FIXME
+    EndFunc
+
+    Func addRealMinutes()
+        ;FIXME
+    EndFunc
+
+    Func addRealSecond()
+        ;FIXME
+    EndFunc
+
+    Func addRealSeconds()
+        ;FIXME
+    EndFunc
+
+    Func addSecond()
+        ;FIXME
+    EndFunc
+
+    Func addSeconds()
+        ;FIXME
+    EndFunc
+
+    Func addWeek()
+        ;FIXME
+    EndFunc
+
+    Func addWeeks()
+        ;FIXME
+    EndFunc
+
+    Func addWeekday()
+        ;FIXME
+    EndFunc
+
+    Func addWeekdays()
+        ;FIXME
+    EndFunc
+
+    Func addYear()
+        ;FIXME
+    EndFunc
+
+    Func addYearNoOverflow()
+        ;FIXME
+    EndFunc
+
+    Func addYears()
+        ;FIXME
+    EndFunc
+
+    Func addYearsNoOverflow()
+        ;FIXME
+    EndFunc
+
+    Func addYearsWithOverflow()
+        ;FIXME
+    EndFunc
+
+    Func addYearWithOverflow()
+        ;FIXME
+    EndFunc
+
+    Func copy()
+        Local $clone = DateTime()
+        $clone.ts = $this.ts
+        $clone.tz = $this.tz
+        Return $clone
+    EndFunc
+
+    Func format()
+        ;FIXME: implement
+    EndFunc
+
+    Func startOfDay()
+        $this.setTime(0, 0, 0, 0)
+    EndFunc
+
+    Func endOfDay()
+        $this.setTime(23, 59, 59, 999)
+    EndFunc
+
+    Func setDateTime($year, $month, $day, $hour, $minute, $second = 0, $milliseconds = 0)
+        $this.setDate($year, $month, $day)
+        $this.setTime($hour, $minute, $second, $milliseconds)
+    EndFunc
+
+    Func setDate($year, $month, $day)
+        Local $aShards = $this.tsShards()
+        $this.ts = StringFormat($__g_DateTime_sTsFormat, $year, $month, $day, $aShards[$__g_DateTime_ts_hour], $aShards[$__g_DateTime_ts_minute], $aShards[$__g_DateTime_ts_second], $aShards[$__g_DateTime_ts_millisecond])
+    EndFunc
+
+    Func setTime($hour, $minute, $second = 0, $milliseconds = 0)
+        Local $aShards = $this.tsShards()
+        $this.ts = StringFormat($__g_DateTime_sTsFormat, $aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day], $hour, $minute, $second, $milliseconds)
+    EndFunc
+
+    Func setTimeFromTimeString()
+        ;FIXME
+    EndFunc
+
+    Func setTimezone()
+        ;FIXME
+    EndFunc
+
+    Func toDateString()
+        ;FIXME
+    EndFunc
+
+    Func toDateTimeString()
+        ;FIXME
+    EndFunc
+
+    Func toFormattedDateString()
+        ;FIXME
+    EndFunc
+EndClass
+
+$oDateTime = DateTime()
+
+$time = TimerInit()
+
+ConsoleWrite($oDateTime.ts&@CRLF)
+
+$oDateTime.day = 12
+
+ConsoleWrite($oDateTime.ts&@CRLF)
+
+$oDateTime.startOfDay()
+
+ConsoleWrite($oDateTime.ts&@CRLF)
+
+$oDateTime.endOfDay()
+
+ConsoleWrite($oDateTime.ts&@CRLF)
+
+ConsoleWrite(TimerDiff($time)&@CRLF)
