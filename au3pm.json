@@ -1,0 +1,1 @@
+{"name":"au3DateTime","version":"1.0.0","description":"Easy datetime functionality for AutoIt3","main":"DateTime.au3","scripts":{},"dependencies":{"autoit":">=3.3.14.5","au3class":"1.0.0","au3obj":"1.0.0","au3unit":"1.0.0"},"devDependencies":{},"bin":{}}
