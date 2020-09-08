@@ -100,6 +100,7 @@ Func DateTime($ts = 'now')
 	$this.__defineGetter("toDateString", __Class_DateTime_toDateString)
 	$this.__defineGetter("toDateTimeString", __Class_DateTime_toDateTimeString)
 	$this.__defineGetter("toFormattedDateString", __Class_DateTime_toFormattedDateString)
+	$this.__defineGetter("getTimezone", __Class_DateTime_getTimezone)
 	$this.__seal()
 	__Class_DateTime___construct($this, $ts)
 	Return $this
@@ -139,22 +140,33 @@ EndFunc
 
 Func __Getter__Class_DateTime_dayOfWeekIso($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
-	;FIXME
+	Local $aShards = $this.tsShards()
+        Return _DateToDayOfWeekISO($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day])
 EndFunc
 
 Func __Getter__Class_DateTime_dayOfYear($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
-	;FIXME
+	Local $aShards = $this.tsShards()
+        Local $iDay = 0
+        Local $i
+        For $i = 1 To $aShards[$__g_DateTime_ts_month]-1 Step +1
+            $iDay += _DateDaysInMonth($aShards[$__g_DateTime_ts_year], $i)
+        Next
+        $iDay += $aShards[$__g_DateTime_ts_day]
+        Return $iDay
 EndFunc
 
 Func __Getter__Class_DateTime_daysInMonth($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
-	;FIXME
+	Local $aShards = $this.tsShards()
+        Return _DateDaysInMonth($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month])
 EndFunc
 
 Func __Getter__Class_DateTime_dst($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
 	;FIXME
+        ; GetTimeZoneInformation
+        ; https://docs.microsoft.com/en-us/windows/win32/api/timezoneapi/nf-timezoneapi-gettimezoneinformation
 EndFunc
 
 Func __Getter__Class_DateTime_hour($_oAccessorObject)
@@ -183,7 +195,21 @@ EndFunc
 
 Func __Getter__Class_DateTime_timestamp($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
-	;FIXME
+	Local $aShards = $this.tsShards()
+        Local $aSysTimeInfo = _Date_Time_GetTimeZoneInformation()
+        Local $utcTime = ""
+
+        If Int($aShards[$__g_DateTime_ts_year], 1) < 1970 Then Return SetError(1, 0, -1)
+
+        Local $sDate = StringFormat('%04d/%02d/%02d %02d:%02d:%02d', $aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day], $aShards[$__g_DateTime_ts_hour], $aShards[$__g_DateTime_ts_minute], $aShards[$__g_DateTime_ts_second])
+
+        If $aSysTimeInfo[0] = 2 Then ; if daylight saving time is active
+            $utcTime = _DateAdd('n', $aSysTimeInfo[1] + $aSysTimeInfo[7], $sDate) ; account for time zone and daylight saving time
+        Else
+            $utcTime = _DateAdd('n', $aSysTimeInfo[1], $sDate) ; account for time zone
+        EndIf
+
+        Return _DateDiff('s', "1970/01/01 00:00:00", $utcTime)
 EndFunc
 
 Func __Getter__Class_DateTime_timezone($_oAccessorObject)
@@ -586,24 +612,9 @@ Func __Class_DateTime_toFormattedDateString($this)
 	;FIXME
 EndFunc
 
+Func __Class_DateTime_getTimezone($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
 
 
-$oDateTime = DateTime()
-
-$time = TimerInit()
-
-ConsoleWrite($oDateTime.ts&@CRLF)
-
-$oDateTime.day = 12
-
-ConsoleWrite($oDateTime.ts&@CRLF)
-
-$oDateTime.startOfDay()
-
-ConsoleWrite($oDateTime.ts&@CRLF)
-
-$oDateTime.endOfDay()
-
-ConsoleWrite($oDateTime.ts&@CRLF)
-
-ConsoleWrite(TimerDiff($time)&@CRLF)
