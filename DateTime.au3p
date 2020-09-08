@@ -54,7 +54,8 @@ Class DateTime
     EndFunc
 
     Get Func dayOfWeekIso()
-        ;FIXME
+        Local $aShards = $this.tsShards()
+        Return _DateToDayOfWeekISO($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day])
     EndFunc
 
     Set Func dayOfWeekIso()
@@ -62,7 +63,14 @@ Class DateTime
     EndFunc
 
     Get Func dayOfYear()
-        ;FIXME
+        Local $aShards = $this.tsShards()
+        Local $iDay = 0
+        Local $i
+        For $i = 1 To $aShards[$__g_DateTime_ts_month]-1 Step +1
+            $iDay += _DateDaysInMonth($aShards[$__g_DateTime_ts_year], $i)
+        Next
+        $iDay += $aShards[$__g_DateTime_ts_day]
+        Return $iDay
     EndFunc
 
     Set Func dayOfYear()
@@ -70,7 +78,8 @@ Class DateTime
     EndFunc
 
     Get Func daysInMonth()
-        ;FIXME
+        Local $aShards = $this.tsShards()
+        Return _DateDaysInMonth($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month])
     EndFunc
 
     Set Func daysInMonth()
@@ -79,6 +88,8 @@ Class DateTime
 
     Get Func dst()
         ;FIXME
+        ; GetTimeZoneInformation
+        ; https://docs.microsoft.com/en-us/windows/win32/api/timezoneapi/nf-timezoneapi-gettimezoneinformation
     EndFunc
 
     Set Func dst()
@@ -126,7 +137,21 @@ Class DateTime
     EndFunc
 
     Get Func timestamp()
-        ;FIXME
+        Local $aShards = $this.tsShards()
+        Local $aSysTimeInfo = _Date_Time_GetTimeZoneInformation()
+        Local $utcTime = ""
+
+        If Int($aShards[$__g_DateTime_ts_year], 1) < 1970 Then Return SetError(1, 0, -1)
+
+        Local $sDate = StringFormat('%04d/%02d/%02d %02d:%02d:%02d', $aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day], $aShards[$__g_DateTime_ts_hour], $aShards[$__g_DateTime_ts_minute], $aShards[$__g_DateTime_ts_second])
+
+        If $aSysTimeInfo[0] = 2 Then ; if daylight saving time is active
+            $utcTime = _DateAdd('n', $aSysTimeInfo[1] + $aSysTimeInfo[7], $sDate) ; account for time zone and daylight saving time
+        Else
+            $utcTime = _DateAdd('n', $aSysTimeInfo[1], $sDate) ; account for time zone
+        EndIf
+
+        Return _DateDiff('s', "1970/01/01 00:00:00", $utcTime)
     EndFunc
 
     Set Func timestamp()
@@ -392,24 +417,8 @@ Class DateTime
     Func toFormattedDateString()
         ;FIXME
     EndFunc
+
+    Func getTimezone()
+        ;FIXME
+    EndFunc
 EndClass
-
-$oDateTime = DateTime()
-
-$time = TimerInit()
-
-ConsoleWrite($oDateTime.ts&@CRLF)
-
-$oDateTime.day = 12
-
-ConsoleWrite($oDateTime.ts&@CRLF)
-
-$oDateTime.startOfDay()
-
-ConsoleWrite($oDateTime.ts&@CRLF)
-
-$oDateTime.endOfDay()
-
-ConsoleWrite($oDateTime.ts&@CRLF)
-
-ConsoleWrite(TimerDiff($time)&@CRLF)
