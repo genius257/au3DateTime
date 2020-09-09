@@ -6,8 +6,30 @@
 
 Global Const $__g_DateTime_sTsFormat = '%04d-%02d-%02d %02d:%02d:%02d.%03d'
 Global Const $__g_DateTime_sTsPattern = '^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}).(\d{3})$'
+Global Const $__g_DateTime_YEARS_PER_MILLENNIUM = 1000
+Global Const $__g_DateTime_YEARS_PER_CENTURY = 100
+Global Const $__g_DateTime_YEARS_PER_DECADE = 10
+Global Const $__g_DateTime_MONTHS_PER_YEAR = 12
+Global Const $__g_DateTime_MONTHS_PER_QUARTER = 3
+Global Const $__g_DateTime_WEEKS_PER_YEAR = 52
+Global Const $__g_DateTime_WEEKS_PER_MONTH = 4
+Global Const $__g_DateTime_DAYS_PER_YEAR = 365
+Global Const $__g_DateTime_DAYS_PER_WEEK = 7
+Global Const $__g_DateTime_HOURS_PER_DAY = 24
+Global Const $__g_DateTime_MINUTES_PER_HOUR = 60
+Global Const $__g_DateTime_SECONDS_PER_MINUTE = 60
+Global Const $__g_DateTime_MILLISECONDS_PER_MONUTE = 1000
+Global Const $__g_DateTime_MICROSECONDS_PER_MILLISECOND = 1000
+Global Const $__g_DateTime_MICROSECONDS_PER_SECOND = 1000000
+Global Const $__g_DateTime_WEEK_DAY_AUTO = 'auto'
 Global Enum $__g_DateTime_ts_year, $__g_DateTime_ts_month, $__g_DateTime_ts_day, $__g_DateTime_ts_hour, $__g_DateTime_ts_minute, $__g_DateTime_ts_second, $__g_DateTime_ts_millisecond
-Global Enum $__g_DateTIme_SUNDAY = 1, $__g_DateTIme_MONDAY, $__g_DateTIme_TUESDAY, $__g_DateTIme_WEDNESDAY, $__g_DateTIme_THURSDAY, $__g_DateTIme_FRIDAY, $__g_DateTIme_SATURDAY
+Global Enum $__g_DateTime_SUNDAY = 1, $__g_DateTime_MONDAY, $__g_DateTime_TUESDAY, $__g_DateTime_WEDNESDAY, $__g_DateTime_THURSDAY, $__g_DateTime_FRIDAY, $__g_DateTime_SATURDAY
+Global $__g_DateTime_weekStartsAt = $__g_DateTime_MONDAY
+Global $__g_DateTime_weekEndsAt = $__g_DateTime_SUNDAY
+Global $__g_DateTime_weekendDays = [$__g_DateTime_SATURDAY, $__g_DateTime_SUNDAY]
+Global $__g_DateTime_monthsOverflow = True
+Global $__g_DateTime_yearsOverflow = True
+Global $__g_DateTime_midDayAt = 12
 
 Class DateTime
     $ts = Null
@@ -24,8 +46,7 @@ Class DateTime
     EndFunc
 
     Get Func month()
-        Return $this.tsShards()[$__g_DateTime_ts_month]
-        Return Int(StringMid($this.ts, 6, 2), 1)
+        Return Int($this.tsShards()[$__g_DateTime_ts_month], 1)
     EndFunc
 
     Set Func month($value)
@@ -34,8 +55,7 @@ Class DateTime
     EndFunc
 
     Get Func day()
-        Return $this.tsShards()[$__g_DateTime_ts_day]
-        Return Int(StringMid($this.ts, 9, 2), 1)
+        Return Int($this.tsShards()[$__g_DateTime_ts_day], 1)
     EndFunc
 
     Set Func day($value)
@@ -49,17 +69,9 @@ Class DateTime
         Return _DateToDayOfWeek($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day])
     EndFunc
 
-    Set Func dayOfWeek()
-        ;FIXME
-    EndFunc
-
     Get Func dayOfWeekIso()
         Local $aShards = $this.tsShards()
         Return _DateToDayOfWeekISO($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day])
-    EndFunc
-
-    Set Func dayOfWeekIso()
-        ;FIXME
     EndFunc
 
     Get Func dayOfYear()
@@ -97,8 +109,7 @@ Class DateTime
     EndFunc
 
     Get Func hour()
-        Return $this.tsShards()[$__g_DateTime_ts_hour]
-        Return Int(StringMid($this.ts, 12, 2), 1)
+        Return Int($this.tsShards()[$__g_DateTime_ts_hour], 1)
     EndFunc
 
     Set Func hour($value)
@@ -107,8 +118,7 @@ Class DateTime
     EndFunc
 
     Get Func minute()
-        Return $this.tsShards()[$__g_DateTime_ts_minute]
-        Return Int(StringMid($this.ts, 15, 2), 1)
+        Return Int($this.tsShards()[$__g_DateTime_ts_minute], 1)
     EndFunc
 
     Set Func minute($value)
@@ -117,8 +127,7 @@ Class DateTime
     EndFunc
 
     Get Func second()
-        Return $this.tsShards()[$__g_DateTime_ts_second]
-        Return Int(StringMid($this.ts, 18, 2), 1)
+        Return Int($this.tsShards()[$__g_DateTime_ts_second], 1)
     EndFunc
 
     Set Func second($value)
@@ -128,7 +137,6 @@ Class DateTime
 
     Get Func millisecond()
         Return $this.tsShards()[$__g_DateTime_ts_millisecond]
-        Return Int(StringMid($this.ts, 21, 3), 1)
     EndFunc
 
     Set Func millisecond($value)
@@ -175,35 +183,70 @@ Class DateTime
     EndFunc
 
     Get Func weekNumberInMonth()
-        ;FIXME
-    EndFunc
-
-    Set Func weekNumberInMonth()
-        ;FIXME
+        Local $aShards = $this.tsShards()
+        Ceiling(($this.day + _DateToDayOfWeekISO($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day]) - 1) / $__g_DateTime_DAYS_PER_WEEK)
     EndFunc
 
     Get Func weekOfMonth()
-        ;FIXME
-    EndFunc
-
-    Set Func weekOfMonth()
-        ;FIXME
+        Return Ceiling($this.day / $__g_DateTime_DAYS_PER_WEEK)
+        ;Local $aShards = $this.tsShards()
+        ;Local $first = _WeekNumberISO($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], 1)
+        ;Local $time = _WeekNumberISO($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day])
+        ;Local $first = _WeekNumber($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], 1)
+        ;Local $time = _WeekNumber($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day])
+        ;Return $time - $first + 1
     EndFunc
 
     Get Func weekOfYear()
-        ;FIXME
-    EndFunc
-
-    Set Func weekOfYear()
-        ;FIXME
+        Local $aShards = $this.tsShards()
+        Return _WeekNumberISO($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day])
     EndFunc
 
     Get Func yearIso()
-        ;FIXME
+        Local $aShards = $this.tsShards()
+        Return (_WeekNumberISO($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day]) < 10 And $aShards[$__g_DateTime_ts_month] == 12) ? $aShards[$__g_DateTime_ts_year]+1 : Int($aShards[$__g_DateTime_ts_year], 1)
     EndFunc
 
-    Set Func yearIso()
-        ;FIXME
+    Get Func century()
+        Local $factor = 1
+        Local $year = $this.year
+        If ($year < 0) Then
+            $year = -$year
+            $factor = -1
+        EndIf
+
+        Return $factor * Ceiling($year / $__g_DateTime_YEARS_PER_CENTURY)
+        ;Local $aShards = $this.tsShards()
+        ;Return Ceiling($aShards[$__g_DateTime_ts_year] / 100)
+    EndFunc
+
+    Get Func decade()
+        Local $aShards = $this.tsShards()
+        Return Ceiling($aShards[$__g_DateTime_ts_year] / $__g_DateTime_YEARS_PER_DECADE)
+    EndFunc
+
+    Get Func quarter()
+        Local $aShards = $this.tsShards()
+        Return Ceiling($aShards[$__g_DateTime_ts_month] / $__g_DateTime_MONTHS_PER_QUARTER)
+    EndFunc
+
+    Get Func millennium()
+        Local $factor = 1
+        Local $year = this.year
+        If ($year < 0) Then
+            $year = -$year
+            $factor = -1
+        EndIf
+
+        Return $factor * Ceiling($year / $__g_DateTime_YEARS_PER_MILLENNIUM)
+    EndFunc
+
+    Get Func daysInYear()
+        Return $this.isLeapYear() ? 366 : 365
+    EndFunc
+
+    Get Func age()
+        Return $this.diffInYears()
     EndFunc
 
     Func __construct($ts = 'now')
@@ -212,11 +255,13 @@ Class DateTime
 
         $this.ts = $ts
     EndFunc
+
     #cs
     Func __destruct()
         ; Destructor code here.
     EndFunc
     #ce
+
     Func tsShards()
         Return StringRegExp($this.ts, $__g_DateTime_sTsPattern, 1)
     EndFunc
@@ -383,6 +428,49 @@ Class DateTime
         $this.setTime(23, 59, 59, 999)
     EndFunc
 
+    Func startOfMonth()
+        $this.setDate($this.year, $this.month, 1)
+        $this.startOfDay()
+    EndFunc
+
+    Func endOfMonth()
+        $this.setDate($this.year, $this.month, this.daysInMonth)
+        $this.endOfDay()
+    EndFunc
+
+    Func startOfQuarter()
+        Local $month = ($this.quarter - 1) * $__g_DateTime_MONTHS_PER_QUARTER + 1
+
+        $this.setDate($this.year, $month, 1)
+        $this.startOfDay()
+    EndFunc
+
+    Func endOfQuarter()
+        $this.startOfQuarter()
+        $this.addMonths($__g_DateTime_MONTHS_PER_QUARTER - 1)
+        $this.endOfMonth()
+    EndFunc
+
+    Func startOfYear()
+        $this.setDate($this.year, 1, 1)
+        $this.startOfDay()
+    EndFunc
+
+    Func endOfYear()
+        $this.setDate($this.year, 12, 31)
+        $this.endOfDay()
+    EndFunc
+
+    ;FIXME
+    ;startOfDecade
+    ;startOfCentury
+    ;startOfMillennium
+    ;startOfWeek
+    ;startOfHour
+    ;startOfMinute
+    ;startOfSecond
+    ;startOf
+
     Func setDateTime($year, $month, $day, $hour, $minute, $second = 0, $milliseconds = 0)
         $this.setDate($year, $month, $day)
         $this.setTime($hour, $minute, $second, $milliseconds)
@@ -420,5 +508,100 @@ Class DateTime
 
     Func getTimezone()
         ;FIXME
+    EndFunc
+
+    Func diff()
+        ;FIXME
+    EndFunc
+
+    Func diffAsDateTimeInterval()
+        ;FIXME
+    EndFunc
+
+    Func diffInYears()
+        ;FIXME
+    EndFunc
+
+    Func diffInQuarters()
+        ;FIXME
+    EndFunc
+
+    Func diffInMonths()
+        ;FIXME
+    EndFunc
+
+    Func diffInWeeks()
+        ;FIXME
+    EndFunc
+
+    Func diffInDays()
+        ;FIXME
+    EndFunc
+
+    Func diffInHours()
+        ;FIXME
+    EndFunc
+
+    Func diffInRealHours()
+        ;FIXME
+    EndFunc
+
+    Func diffInMinutes()
+        ;FIXME
+    EndFunc
+
+    Func diffInRealMinutes()
+        ;FIXME
+    EndFunc
+
+    Func diffInSeconds()
+        ;FIXME
+    EndFunc
+
+    Func diffInRealSeconds()
+        ;FIXME
+    EndFunc
+
+    Func diffInMicroseconds()
+        ;FIXME
+    EndFunc
+
+    Func diffInRealMicroseconds()
+        ;FIXME
+    EndFunc
+
+    Func diffInMilliseconds()
+        ;FIXME
+    EndFunc
+
+    Func diffInRealMilliseconds()
+        ;FIXME
+    EndFunc
+
+    Func secondsSinceMidnight()
+        ;FIXME
+    EndFunc
+
+    Func secondsUntilEndOfDay()
+        ;FIXME
+    EndFunc
+
+    Func diffForHumans()
+        ;FIXME
+    EndFunc
+
+    Func getMidDayAt()
+        Return $__g_DateTime_midDayAt
+    EndFunc
+
+    Func isLeapYear()
+        Return _DateIsLeapYear($this.year) = 1
+    EndFunc
+
+    Func isLongYear()
+        Local $d = DateTime()
+        $d.setDateTime($this.year, 12, 28, 0, 0, 0)
+        $d.setTimezone($this.tz)
+        Return $d.weekOfYear = 53
     EndFunc
 EndClass
