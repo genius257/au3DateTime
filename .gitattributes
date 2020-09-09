@@ -1,0 +1,5 @@
+# reclassify `.au3p` files as AutoIt:
+*.au3p linguist-language=AutoIt
+
+# Replace any whitespace in the language name with hyphens:
+# *.glyphs linguist-language=OpenStep-Property-List
