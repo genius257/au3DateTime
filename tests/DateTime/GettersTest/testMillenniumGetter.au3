@@ -1,0 +1,32 @@
+#AutoIt3Wrapper_Run_AU3Check=N
+
+#include "..\..\..\au3pm\au3unit\Unit\assert.au3"
+#include "..\..\..\DateTime.au3"
+
+$d = DateTime()
+$d.setDateTime(1234, 5, 6, 7, 8, 9)
+assertSame(2, $d.millennium)
+$d = DateTime()
+$d.setDateTime(2000, 5, 6, 7, 8, 9)
+assertSame(2, $d.millennium)
+$d = DateTime()
+$d.setDateTime(2001, 5, 6, 7, 8, 9)
+assertSame(3, $d.millennium)
+$d = DateTime()
+$d.setDateTime(1, 5, 6, 7, 8, 9)
+assertSame(1, $d.millennium)
+$d = DateTime()
+$d.setDateTime(-1, 5, 6, 7, 8, 9)
+assertSame(-1, $d.millennium)
+$d = DateTime()
+$d.setDateTime(-100, 5, 6, 7, 8, 9)
+assertSame(-1, $d.millennium)
+$d = DateTime()
+$d.setDateTime(-101, 5, 6, 7, 8, 9)
+assertSame(-1, $d.millennium)
+$d = DateTime()
+$d.setDateTime(-1000, 5, 6, 7, 8, 9)
+assertSame(-1, $d.millennium)
+$d = DateTime()
+$d.setDateTime(-1001, 5, 6, 7, 8, 9)
+assertSame(-2, $d.millennium)
