@@ -7,8 +7,30 @@
 
 Global Const $__g_DateTime_sTsFormat = '%04d-%02d-%02d %02d:%02d:%02d.%03d'
 Global Const $__g_DateTime_sTsPattern = '^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}).(\d{3})$'
+Global Const $__g_DateTime_YEARS_PER_MILLENNIUM = 1000
+Global Const $__g_DateTime_YEARS_PER_CENTURY = 100
+Global Const $__g_DateTime_YEARS_PER_DECADE = 10
+Global Const $__g_DateTime_MONTHS_PER_YEAR = 12
+Global Const $__g_DateTime_MONTHS_PER_QUARTER = 3
+Global Const $__g_DateTime_WEEKS_PER_YEAR = 52
+Global Const $__g_DateTime_WEEKS_PER_MONTH = 4
+Global Const $__g_DateTime_DAYS_PER_YEAR = 365
+Global Const $__g_DateTime_DAYS_PER_WEEK = 7
+Global Const $__g_DateTime_HOURS_PER_DAY = 24
+Global Const $__g_DateTime_MINUTES_PER_HOUR = 60
+Global Const $__g_DateTime_SECONDS_PER_MINUTE = 60
+Global Const $__g_DateTime_MILLISECONDS_PER_MONUTE = 1000
+Global Const $__g_DateTime_MICROSECONDS_PER_MILLISECOND = 1000
+Global Const $__g_DateTime_MICROSECONDS_PER_SECOND = 1000000
+Global Const $__g_DateTime_WEEK_DAY_AUTO = 'auto'
 Global Enum $__g_DateTime_ts_year, $__g_DateTime_ts_month, $__g_DateTime_ts_day, $__g_DateTime_ts_hour, $__g_DateTime_ts_minute, $__g_DateTime_ts_second, $__g_DateTime_ts_millisecond
-Global Enum $__g_DateTIme_SUNDAY = 1, $__g_DateTIme_MONDAY, $__g_DateTIme_TUESDAY, $__g_DateTIme_WEDNESDAY, $__g_DateTIme_THURSDAY, $__g_DateTIme_FRIDAY, $__g_DateTIme_SATURDAY
+Global Enum $__g_DateTime_SUNDAY = 1, $__g_DateTime_MONDAY, $__g_DateTime_TUESDAY, $__g_DateTime_WEDNESDAY, $__g_DateTime_THURSDAY, $__g_DateTime_FRIDAY, $__g_DateTime_SATURDAY
+Global $__g_DateTime_weekStartsAt = $__g_DateTime_MONDAY
+Global $__g_DateTime_weekEndsAt = $__g_DateTime_SUNDAY
+Global $__g_DateTime_weekendDays = [$__g_DateTime_SATURDAY, $__g_DateTime_SUNDAY]
+Global $__g_DateTime_monthsOverflow = True
+Global $__g_DateTime_yearsOverflow = True
+Global $__g_DateTime_midDayAt = 12
 
 Func DateTime($ts = 'now')
 	Local $this = IDispatch()
@@ -33,11 +55,15 @@ Func DateTime($ts = 'now')
 	$this.__defineGetter("weekOfMonth", __Getter__Class_DateTime_weekOfMonth)
 	$this.__defineGetter("weekOfYear", __Getter__Class_DateTime_weekOfYear)
 	$this.__defineGetter("yearIso", __Getter__Class_DateTime_yearIso)
+	$this.__defineGetter("century", __Getter__Class_DateTime_century)
+	$this.__defineGetter("decade", __Getter__Class_DateTime_decade)
+	$this.__defineGetter("quarter", __Getter__Class_DateTime_quarter)
+	$this.__defineGetter("millennium", __Getter__Class_DateTime_millennium)
+	$this.__defineGetter("daysInYear", __Getter__Class_DateTime_daysInYear)
+	$this.__defineGetter("age", __Getter__Class_DateTime_age)
 	$this.__defineSetter("year", __Setter__Class_DateTime_year)
 	$this.__defineSetter("month", __Setter__Class_DateTime_month)
 	$this.__defineSetter("day", __Setter__Class_DateTime_day)
-	$this.__defineSetter("dayOfWeek", __Setter__Class_DateTime_dayOfWeek)
-	$this.__defineSetter("dayOfWeekIso", __Setter__Class_DateTime_dayOfWeekIso)
 	$this.__defineSetter("dayOfYear", __Setter__Class_DateTime_dayOfYear)
 	$this.__defineSetter("daysInMonth", __Setter__Class_DateTime_daysInMonth)
 	$this.__defineSetter("dst", __Setter__Class_DateTime_dst)
@@ -48,10 +74,6 @@ Func DateTime($ts = 'now')
 	$this.__defineSetter("timestamp", __Setter__Class_DateTime_timestamp)
 	$this.__defineSetter("timezone", __Setter__Class_DateTime_timezone)
 	$this.__defineSetter("utc", __Setter__Class_DateTime_utc)
-	$this.__defineSetter("weekNumberInMonth", __Setter__Class_DateTime_weekNumberInMonth)
-	$this.__defineSetter("weekOfMonth", __Setter__Class_DateTime_weekOfMonth)
-	$this.__defineSetter("weekOfYear", __Setter__Class_DateTime_weekOfYear)
-	$this.__defineSetter("yearIso", __Setter__Class_DateTime_yearIso)
 	$this.__defineGetter("tsShards", __Class_DateTime_tsShards)
 	$this.__defineGetter("add", __Class_DateTime_add)
 	$this.__defineGetter("addCenturies", __Class_DateTime_addCenturies)
@@ -92,6 +114,12 @@ Func DateTime($ts = 'now')
 	$this.__defineGetter("format", __Class_DateTime_format)
 	$this.__defineGetter("startOfDay", __Class_DateTime_startOfDay)
 	$this.__defineGetter("endOfDay", __Class_DateTime_endOfDay)
+	$this.__defineGetter("startOfMonth", __Class_DateTime_startOfMonth)
+	$this.__defineGetter("endOfMonth", __Class_DateTime_endOfMonth)
+	$this.__defineGetter("startOfQuarter", __Class_DateTime_startOfQuarter)
+	$this.__defineGetter("endOfQuarter", __Class_DateTime_endOfQuarter)
+	$this.__defineGetter("startOfYear", __Class_DateTime_startOfYear)
+	$this.__defineGetter("endOfYear", __Class_DateTime_endOfYear)
 	$this.__defineGetter("setDateTime", __Class_DateTime_setDateTime)
 	$this.__defineGetter("setDate", __Class_DateTime_setDate)
 	$this.__defineGetter("setTime", __Class_DateTime_setTime)
@@ -101,6 +129,29 @@ Func DateTime($ts = 'now')
 	$this.__defineGetter("toDateTimeString", __Class_DateTime_toDateTimeString)
 	$this.__defineGetter("toFormattedDateString", __Class_DateTime_toFormattedDateString)
 	$this.__defineGetter("getTimezone", __Class_DateTime_getTimezone)
+	$this.__defineGetter("diff", __Class_DateTime_diff)
+	$this.__defineGetter("diffAsDateTimeInterval", __Class_DateTime_diffAsDateTimeInterval)
+	$this.__defineGetter("diffInYears", __Class_DateTime_diffInYears)
+	$this.__defineGetter("diffInQuarters", __Class_DateTime_diffInQuarters)
+	$this.__defineGetter("diffInMonths", __Class_DateTime_diffInMonths)
+	$this.__defineGetter("diffInWeeks", __Class_DateTime_diffInWeeks)
+	$this.__defineGetter("diffInDays", __Class_DateTime_diffInDays)
+	$this.__defineGetter("diffInHours", __Class_DateTime_diffInHours)
+	$this.__defineGetter("diffInRealHours", __Class_DateTime_diffInRealHours)
+	$this.__defineGetter("diffInMinutes", __Class_DateTime_diffInMinutes)
+	$this.__defineGetter("diffInRealMinutes", __Class_DateTime_diffInRealMinutes)
+	$this.__defineGetter("diffInSeconds", __Class_DateTime_diffInSeconds)
+	$this.__defineGetter("diffInRealSeconds", __Class_DateTime_diffInRealSeconds)
+	$this.__defineGetter("diffInMicroseconds", __Class_DateTime_diffInMicroseconds)
+	$this.__defineGetter("diffInRealMicroseconds", __Class_DateTime_diffInRealMicroseconds)
+	$this.__defineGetter("diffInMilliseconds", __Class_DateTime_diffInMilliseconds)
+	$this.__defineGetter("diffInRealMilliseconds", __Class_DateTime_diffInRealMilliseconds)
+	$this.__defineGetter("secondsSinceMidnight", __Class_DateTime_secondsSinceMidnight)
+	$this.__defineGetter("secondsUntilEndOfDay", __Class_DateTime_secondsUntilEndOfDay)
+	$this.__defineGetter("diffForHumans", __Class_DateTime_diffForHumans)
+	$this.__defineGetter("getMidDayAt", __Class_DateTime_getMidDayAt)
+	$this.__defineGetter("isLeapYear", __Class_DateTime_isLeapYear)
+	$this.__defineGetter("isLongYear", __Class_DateTime_isLongYear)
 	$this.__seal()
 	__Class_DateTime___construct($this, $ts)
 	Return $this
@@ -121,14 +172,12 @@ EndFunc
 
 Func __Getter__Class_DateTime_month($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
-	Return $this.tsShards()[$__g_DateTime_ts_month]
-        Return Int(StringMid($this.ts, 6, 2), 1)
+	Return Int($this.tsShards()[$__g_DateTime_ts_month], 1)
 EndFunc
 
 Func __Getter__Class_DateTime_day($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
-	Return $this.tsShards()[$__g_DateTime_ts_day]
-        Return Int(StringMid($this.ts, 9, 2), 1)
+	Return Int($this.tsShards()[$__g_DateTime_ts_day], 1)
 EndFunc
 
 Func __Getter__Class_DateTime_dayOfWeek($_oAccessorObject)
@@ -171,26 +220,22 @@ EndFunc
 
 Func __Getter__Class_DateTime_hour($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
-	Return $this.tsShards()[$__g_DateTime_ts_hour]
-        Return Int(StringMid($this.ts, 12, 2), 1)
+	Return Int($this.tsShards()[$__g_DateTime_ts_hour], 1)
 EndFunc
 
 Func __Getter__Class_DateTime_minute($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
-	Return $this.tsShards()[$__g_DateTime_ts_minute]
-        Return Int(StringMid($this.ts, 15, 2), 1)
+	Return Int($this.tsShards()[$__g_DateTime_ts_minute], 1)
 EndFunc
 
 Func __Getter__Class_DateTime_second($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
-	Return $this.tsShards()[$__g_DateTime_ts_second]
-        Return Int(StringMid($this.ts, 18, 2), 1)
+	Return Int($this.tsShards()[$__g_DateTime_ts_second], 1)
 EndFunc
 
 Func __Getter__Class_DateTime_millisecond($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
 	Return $this.tsShards()[$__g_DateTime_ts_millisecond]
-        Return Int(StringMid($this.ts, 21, 3), 1)
 EndFunc
 
 Func __Getter__Class_DateTime_timestamp($_oAccessorObject)
@@ -224,22 +269,79 @@ EndFunc
 
 Func __Getter__Class_DateTime_weekNumberInMonth($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
-	;FIXME
+	Local $aShards = $this.tsShards()
+        Ceiling(($this.day + _DateToDayOfWeekISO($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day]) - 1) / $__g_DateTime_DAYS_PER_WEEK)
 EndFunc
 
 Func __Getter__Class_DateTime_weekOfMonth($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
-	;FIXME
+	Return Ceiling($this.day / $__g_DateTime_DAYS_PER_WEEK)
+        ;Local $aShards = $this.tsShards()
+        ;Local $first = _WeekNumberISO($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], 1)
+        ;Local $time = _WeekNumberISO($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day])
+        ;Local $first = _WeekNumber($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], 1)
+        ;Local $time = _WeekNumber($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day])
+        ;Return $time - $first + 1
 EndFunc
 
 Func __Getter__Class_DateTime_weekOfYear($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
-	;FIXME
+	Local $aShards = $this.tsShards()
+        Return _WeekNumberISO($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day])
 EndFunc
 
 Func __Getter__Class_DateTime_yearIso($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
-	;FIXME
+	Local $aShards = $this.tsShards()
+        Return (_WeekNumberISO($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day]) < 10 And $aShards[$__g_DateTime_ts_month] == 12) ? $aShards[$__g_DateTime_ts_year]+1 : Int($aShards[$__g_DateTime_ts_year], 1)
+EndFunc
+
+Func __Getter__Class_DateTime_century($_oAccessorObject)
+	Local $this = $_oAccessorObject.parent
+	Local $factor = 1
+        Local $year = $this.year
+        If ($year < 0) Then
+            $year = -$year
+            $factor = -1
+        EndIf
+
+        Return $factor * Ceiling($year / $__g_DateTime_YEARS_PER_CENTURY)
+        ;Local $aShards = $this.tsShards()
+        ;Return Ceiling($aShards[$__g_DateTime_ts_year] / 100)
+EndFunc
+
+Func __Getter__Class_DateTime_decade($_oAccessorObject)
+	Local $this = $_oAccessorObject.parent
+	Local $aShards = $this.tsShards()
+        Return Ceiling($aShards[$__g_DateTime_ts_year] / $__g_DateTime_YEARS_PER_DECADE)
+EndFunc
+
+Func __Getter__Class_DateTime_quarter($_oAccessorObject)
+	Local $this = $_oAccessorObject.parent
+	Local $aShards = $this.tsShards()
+        Return Ceiling($aShards[$__g_DateTime_ts_month] / $__g_DateTime_MONTHS_PER_QUARTER)
+EndFunc
+
+Func __Getter__Class_DateTime_millennium($_oAccessorObject)
+	Local $this = $_oAccessorObject.parent
+	Local $factor = 1
+        Local $year = this.year
+        If ($year < 0) Then
+            $year = -$year
+            $factor = -1
+        EndIf
+
+        Return $factor * Ceiling($year / $__g_DateTime_YEARS_PER_MILLENNIUM)
+EndFunc
+
+Func __Getter__Class_DateTime_daysInYear($_oAccessorObject)
+	Local $this = $_oAccessorObject.parent
+	Return $this.isLeapYear() ? 366 : 365
+EndFunc
+
+Func __Getter__Class_DateTime_age($_oAccessorObject)
+	Local $this = $_oAccessorObject.parent
+	Return $this.diffInYears()
 EndFunc
 
 Func __Setter__Class_DateTime_year($_oAccessorObject)
@@ -261,16 +363,6 @@ Func __Setter__Class_DateTime_day($_oAccessorObject)
 	Local $value = $_oAccessorObject.ret
 	Local $aShards = $this.tsShards()
         $this.setDate($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $value)
-EndFunc
-
-Func __Setter__Class_DateTime_dayOfWeek($_oAccessorObject)
-	Local $this = $_oAccessorObject.parent
-	;FIXME
-EndFunc
-
-Func __Setter__Class_DateTime_dayOfWeekIso($_oAccessorObject)
-	Local $this = $_oAccessorObject.parent
-	;FIXME
 EndFunc
 
 Func __Setter__Class_DateTime_dayOfYear($_oAccessorObject)
@@ -327,26 +419,6 @@ Func __Setter__Class_DateTime_timezone($_oAccessorObject)
 EndFunc
 
 Func __Setter__Class_DateTime_utc($_oAccessorObject)
-	Local $this = $_oAccessorObject.parent
-	;FIXME
-EndFunc
-
-Func __Setter__Class_DateTime_weekNumberInMonth($_oAccessorObject)
-	Local $this = $_oAccessorObject.parent
-	;FIXME
-EndFunc
-
-Func __Setter__Class_DateTime_weekOfMonth($_oAccessorObject)
-	Local $this = $_oAccessorObject.parent
-	;FIXME
-EndFunc
-
-Func __Setter__Class_DateTime_weekOfYear($_oAccessorObject)
-	Local $this = $_oAccessorObject.parent
-	;FIXME
-EndFunc
-
-Func __Setter__Class_DateTime_yearIso($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
 	;FIXME
 EndFunc
@@ -555,6 +627,45 @@ Func __Class_DateTime_endOfDay($this)
 	$this.setTime(23, 59, 59, 999)
 EndFunc
 
+Func __Class_DateTime_startOfMonth($this)
+	$this = $this.parent
+	$this.setDate($this.year, $this.month, 1)
+        $this.startOfDay()
+EndFunc
+
+Func __Class_DateTime_endOfMonth($this)
+	$this = $this.parent
+	$this.setDate($this.year, $this.month, this.daysInMonth)
+        $this.endOfDay()
+EndFunc
+
+Func __Class_DateTime_startOfQuarter($this)
+	$this = $this.parent
+	Local $month = ($this.quarter - 1) * $__g_DateTime_MONTHS_PER_QUARTER + 1
+
+        $this.setDate($this.year, $month, 1)
+        $this.startOfDay()
+EndFunc
+
+Func __Class_DateTime_endOfQuarter($this)
+	$this = $this.parent
+	$this.startOfQuarter()
+        $this.addMonths($__g_DateTime_MONTHS_PER_QUARTER - 1)
+        $this.endOfMonth()
+EndFunc
+
+Func __Class_DateTime_startOfYear($this)
+	$this = $this.parent
+	$this.setDate($this.year, 1, 1)
+        $this.startOfDay()
+EndFunc
+
+Func __Class_DateTime_endOfYear($this)
+	$this = $this.parent
+	$this.setDate($this.year, 12, 31)
+        $this.endOfDay()
+EndFunc
+
 Func __Class_DateTime_setDateTime($this)
 	Local $year = $this.arguments.values[0]
 	Local $month = $this.arguments.values[1]
@@ -615,6 +726,124 @@ EndFunc
 Func __Class_DateTime_getTimezone($this)
 	$this = $this.parent
 	;FIXME
+EndFunc
+
+Func __Class_DateTime_diff($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_diffAsDateTimeInterval($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_diffInYears($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_diffInQuarters($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_diffInMonths($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_diffInWeeks($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_diffInDays($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_diffInHours($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_diffInRealHours($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_diffInMinutes($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_diffInRealMinutes($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_diffInSeconds($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_diffInRealSeconds($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_diffInMicroseconds($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_diffInRealMicroseconds($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_diffInMilliseconds($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_diffInRealMilliseconds($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_secondsSinceMidnight($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_secondsUntilEndOfDay($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_diffForHumans($this)
+	$this = $this.parent
+	;FIXME
+EndFunc
+
+Func __Class_DateTime_getMidDayAt($this)
+	$this = $this.parent
+	Return $__g_DateTime_midDayAt
+EndFunc
+
+Func __Class_DateTime_isLeapYear($this)
+	$this = $this.parent
+	Return _DateIsLeapYear($this.year) = 1
+EndFunc
+
+Func __Class_DateTime_isLongYear($this)
+	$this = $this.parent
+	Local $d = DateTime()
+        $d.setDateTime($this.year, 12, 28, 0, 0, 0)
+        $d.setTimezone($this.tz)
+        Return $d.weekOfYear = 53
 EndFunc
 
 
