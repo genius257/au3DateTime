@@ -22,7 +22,7 @@ For $i = 0 To UBound($testData, 1)-1 Step +1
     $month = $testData[$i][0]
     $quarter = $testData[$i][1]
     $d = DateTime()
-    $d.setDateTime(2015, $month, 1)
+    $d.setDate(2015, $month, 1)
     $d.endOfMonth()
     assertSame($quarter, $d.quarter)
 Next
