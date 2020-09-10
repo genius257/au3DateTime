@@ -4,6 +4,6 @@
 #include "..\..\..\DateTime.au3"
 
 $d = DateTime()
-$micro = 345678
-$d.setDateTime(2004, 1, 5, 12, 34, 11, $micro)
-assertSame($micro, $d.micro)
+$milliseconds = 345
+$d.setDateTime(2004, 1, 5, 12, 34, 11, $milliseconds)
+assertSame($milliseconds, $d.millisecond)
