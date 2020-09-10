@@ -66,7 +66,6 @@ Class DateTime
 
     Get Func dayOfWeek()
         Local $aShards = $this.tsShards()
-        ;_DateDayOfWeek()
         Return _DateToDayOfWeek($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day])
     EndFunc
 
@@ -185,7 +184,7 @@ Class DateTime
 
     Get Func weekNumberInMonth()
         Local $aShards = $this.tsShards()
-        Ceiling(($this.day + _DateToDayOfWeekISO($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day]) - 1) / $__g_DateTime_DAYS_PER_WEEK)
+        Return Ceiling(($aShards[$__g_DateTime_ts_day] + _DateToDayOfWeekISO($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], 1) - 1) / $__g_DateTime_DAYS_PER_WEEK)
     EndFunc
 
     Get Func weekOfMonth()
@@ -233,7 +232,7 @@ Class DateTime
 
     Get Func millennium()
         Local $factor = 1
-        Local $year = this.year
+        Local $year = $this.year
         If ($year < 0) Then
             $year = -$year
             $factor = -1
