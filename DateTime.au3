@@ -4,6 +4,7 @@
 #include-once
 ; https://github.com/forcedotcom/dataloader/blob/master/windows-dependencies/autoit/Include/Date.au3
 #include <Date.au3>
+#include <WinAPILocale.au3>
 
 Global Const $__g_DateTime_sTsFormat = '%04d-%02d-%02d %02d:%02d:%02d.%03d'
 Global Const $__g_DateTime_sTsPattern = '^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}).(\d{3})$'
@@ -61,6 +62,10 @@ Func DateTime($ts = 'now')
 	$this.__defineGetter("millennium", __Getter__Class_DateTime_millennium)
 	$this.__defineGetter("daysInYear", __Getter__Class_DateTime_daysInYear)
 	$this.__defineGetter("age", __Getter__Class_DateTime_age)
+	$this.__defineGetter("localeDayOfWeek", __Getter__Class_DateTime_localeDayOfWeek)
+	$this.__defineGetter("shortLocaleDayOfWeek", __Getter__Class_DateTime_shortLocaleDayOfWeek)
+	$this.__defineGetter("localeMonth", __Getter__Class_DateTime_localeMonth)
+	$this.__defineGetter("shortLocaleMonth", __Getter__Class_DateTime_shortLocaleMonth)
 	$this.__defineSetter("year", __Setter__Class_DateTime_year)
 	$this.__defineSetter("month", __Setter__Class_DateTime_month)
 	$this.__defineSetter("day", __Setter__Class_DateTime_day)
@@ -152,6 +157,7 @@ Func DateTime($ts = 'now')
 	$this.__defineGetter("getMidDayAt", __Class_DateTime_getMidDayAt)
 	$this.__defineGetter("isLeapYear", __Class_DateTime_isLeapYear)
 	$this.__defineGetter("isLongYear", __Class_DateTime_isLongYear)
+	$this.__defineGetter("formatLocalized", __Class_DateTime_formatLocalized)
 	$this.__seal()
 	__Class_DateTime___construct($this, $ts)
 	Return $this
@@ -183,7 +189,6 @@ EndFunc
 Func __Getter__Class_DateTime_dayOfWeek($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
 	Local $aShards = $this.tsShards()
-        ;_DateDayOfWeek()
         Return _DateToDayOfWeek($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day])
 EndFunc
 
@@ -270,7 +275,7 @@ EndFunc
 Func __Getter__Class_DateTime_weekNumberInMonth($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
 	Local $aShards = $this.tsShards()
-        Ceiling(($this.day + _DateToDayOfWeekISO($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day]) - 1) / $__g_DateTime_DAYS_PER_WEEK)
+        Return Ceiling(($aShards[$__g_DateTime_ts_day] + _DateToDayOfWeekISO($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], 1) - 1) / $__g_DateTime_DAYS_PER_WEEK)
 EndFunc
 
 Func __Getter__Class_DateTime_weekOfMonth($_oAccessorObject)
@@ -325,7 +330,7 @@ EndFunc
 Func __Getter__Class_DateTime_millennium($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
 	Local $factor = 1
-        Local $year = this.year
+        Local $year = $this.year
         If ($year < 0) Then
             $year = -$year
             $factor = -1
@@ -342,6 +347,26 @@ EndFunc
 Func __Getter__Class_DateTime_age($_oAccessorObject)
 	Local $this = $_oAccessorObject.parent
 	Return $this.diffInYears()
+EndFunc
+
+Func __Getter__Class_DateTime_localeDayOfWeek($_oAccessorObject)
+	Local $this = $_oAccessorObject.parent
+	Return $this.formatLocalized('dddd')
+EndFunc
+
+Func __Getter__Class_DateTime_shortLocaleDayOfWeek($_oAccessorObject)
+	Local $this = $_oAccessorObject.parent
+	Return $this.formatLocalized('ddd')
+EndFunc
+
+Func __Getter__Class_DateTime_localeMonth($_oAccessorObject)
+	Local $this = $_oAccessorObject.parent
+	Return $this.formatLocalized('MMMM')
+EndFunc
+
+Func __Getter__Class_DateTime_shortLocaleMonth($_oAccessorObject)
+	Local $this = $_oAccessorObject.parent
+	Return $this.formatLocalized('MMM')
 EndFunc
 
 Func __Setter__Class_DateTime_year($_oAccessorObject)
@@ -844,6 +869,23 @@ Func __Class_DateTime_isLongYear($this)
         $d.setDateTime($this.year, 12, 28, 0, 0, 0)
         $d.setTimezone($this.tz)
         Return $d.weekOfYear = 53
+EndFunc
+
+Func __Class_DateTime_formatLocalized($this)
+	Local $format = $this.arguments.values[0]
+	$this = $this.parent
+	Local $aShards = $this.tsShards()
+        Local $tSystTime = DllStructCreate($tagSYSTEMTIME)
+        $tSystTime.Year = $aShards[$__g_DateTime_ts_year]; $this.year
+        $tSystTime.Month = $aShards[$__g_DateTime_ts_month]; $this.month
+        $tSystTime.Dow = $this.dayOfWeek - 1
+        $tSystTime.Day = $aShards[$__g_DateTime_ts_day]; $this.day
+        $tSystTime.Hour = $aShards[$__g_DateTime_ts_hour]; $this.hour
+        $tSystTime.Minute = $aShards[$__g_DateTime_ts_minute]; $this.minute
+        $tSystTime.Second = $aShards[$__g_DateTime_ts_second]; $this.second
+        $tSystTime.MSeconds = $aShards[$__g_DateTime_ts_millisecond]; $this.millisecond
+        Local $formatted = _WinAPI_GetDateFormat(_WinAPI_GetThreadLocale(), $tSystTime, 0, $format)
+        Return SetError(@error, @extended, $formatted)
 EndFunc
 
 
