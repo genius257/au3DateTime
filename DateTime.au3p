@@ -3,6 +3,7 @@
 #include-once
 ; https://github.com/forcedotcom/dataloader/blob/master/windows-dependencies/autoit/Include/Date.au3
 #include <Date.au3>
+#include <WinAPILocale.au3>
 
 Global Const $__g_DateTime_sTsFormat = '%04d-%02d-%02d %02d:%02d:%02d.%03d'
 Global Const $__g_DateTime_sTsPattern = '^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}).(\d{3})$'
@@ -247,6 +248,22 @@ Class DateTime
 
     Get Func age()
         Return $this.diffInYears()
+    EndFunc
+
+    Get Func localeDayOfWeek()
+        Return $this.formatLocalized('dddd')
+    EndFunc
+
+    Get Func shortLocaleDayOfWeek()
+        Return $this.formatLocalized('ddd')
+    EndFunc
+
+    Get Func localeMonth()
+        Return $this.formatLocalized('MMMM')
+    EndFunc
+
+    Get Func shortLocaleMonth()
+        Return $this.formatLocalized('MMM')
     EndFunc
 
     Func __construct($ts = 'now')
@@ -603,5 +620,20 @@ Class DateTime
         $d.setDateTime($this.year, 12, 28, 0, 0, 0)
         $d.setTimezone($this.tz)
         Return $d.weekOfYear = 53
+    EndFunc
+
+    Func formatLocalized($format)
+        Local $aShards = $this.tsShards()
+        Local $tSystTime = DllStructCreate($tagSYSTEMTIME)
+        $tSystTime.Year = $aShards[$__g_DateTime_ts_year]; $this.year
+        $tSystTime.Month = $aShards[$__g_DateTime_ts_month]; $this.month
+        $tSystTime.Dow = $this.dayOfWeek - 1
+        $tSystTime.Day = $aShards[$__g_DateTime_ts_day]; $this.day
+        $tSystTime.Hour = $aShards[$__g_DateTime_ts_hour]; $this.hour
+        $tSystTime.Minute = $aShards[$__g_DateTime_ts_minute]; $this.minute
+        $tSystTime.Second = $aShards[$__g_DateTime_ts_second]; $this.second
+        $tSystTime.MSeconds = $aShards[$__g_DateTime_ts_millisecond]; $this.millisecond
+        Local $formatted = _WinAPI_GetDateFormat(_WinAPI_GetThreadLocale(), $tSystTime, 0, $format)
+        Return SetError(@error, @extended, $formatted)
     EndFunc
 EndClass
