@@ -85,17 +85,21 @@ Class DateTime
         Return $iDay
     EndFunc
 
-    Set Func dayOfYear()
-        ;FIXME
+    Set Func dayOfYear($value)
+        Local $aShards = $this.tsShards()
+        Local $month = 1
+        Local $mDays = 0
+        Do
+            $value -= $mDays
+            $mDays = _DateDaysInMonth($aShards[$__g_DateTime_ts_year], $month)
+            $month += 1
+        Until $mDays >= $value
+        $this.setDate($aShards[$__g_DateTime_ts_year], $month - 1, $value)
     EndFunc
 
     Get Func daysInMonth()
         Local $aShards = $this.tsShards()
         Return _DateDaysInMonth($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month])
-    EndFunc
-
-    Set Func daysInMonth()
-        ;FIXME
     EndFunc
 
     Get Func dst()
@@ -216,8 +220,6 @@ Class DateTime
         EndIf
 
         Return $factor * Ceiling($year / $__g_DateTime_YEARS_PER_CENTURY)
-        ;Local $aShards = $this.tsShards()
-        ;Return Ceiling($aShards[$__g_DateTime_ts_year] / 100)
     EndFunc
 
     Get Func decade()
@@ -285,72 +287,130 @@ Class DateTime
     #cs
     # @param DateInterval $value
     #ce
-    Func add($value)
-        ;FIXME
+    Func add($unit, $value = 1, $overflow = False)
+
+        If IsNumber($unit) Then
+            Local $tmp = $unit
+            $unit = $value
+            $value = $unit
+        EndIf
+
+        Local $aShards = $this.tsShards()
+        Local $sDate = StringFormat('%04d/%02d/%02d %02d:%02d:%02d', $aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day], $aShards[$__g_DateTime_ts_hour], $aShards[$__g_DateTime_ts_minute], $aShards[$__g_DateTime_ts_second])
+        Switch ($unit)
+            Case 'year'
+                $sDate = _DateAdd('Y', $value, $sDate)
+            Case 'month'
+                $sDate = _DateAdd('M', $value, $sDate)
+            Case 'day'
+                $sDate = _DateAdd('D', $value, $sDate)
+            Case 'week'
+                $sDate = _DateAdd('w', $value, $sDate)
+            Case 'hour'
+                $sDate = _DateAdd('h', $value, $sDate)
+            Case 'minute'
+                $sDate = _DateAdd('n', $value, $sDate)
+            Case 'second'
+                $sDate = _DateAdd('s', $value, $sDate)
+            Case 'millisecond'
+                ;FIXME
+                ;_DateAdd('w', $value, $sDate)
+            Case Else
+                Return SetError(1, 1, False)
+        EndSwitch
+        Local $day = Int($aShards[$__g_DateTime_ts_day], 1)
+        Local $aDate, $aTime
+        _DateTimeSplit($sDate, $aDate, $aTime)
+        If $overflow And $aDate[3] < $day Then
+            $sDate = _DateAdd('D', $day - $aDate[3], $sDate)
+            _DateTimeSplit($sDate, $aDate, $aTime)
+        EndIf
+
+        $this.setDateTime($aDate[1], $aDate[2], $aDate[3], $aTime[1], $aTime[2], $aTime[3], $aShards[$__g_DateTime_ts_millisecond])
     EndFunc
 
-    Func addCenturies()
-        ;FIXME
+    Func addCenturies($value)
+        $this.addYears($__g_DateTime_YEARS_PER_CENTURY * $value)
     EndFunc
 
-    Func addCentury()
-        ;FIXME
+    Func addCentury($value = 1)
+        $this.addCenturies($value)
     EndFunc
 
-    Func addDay()
-        ;FIXME
+    Func subCenturies($value)
+        $this.addCenturies(-1 * $value)
     EndFunc
 
-    Func addDays()
-        ;FIXME
+    Func subCentury($value = 1)
+        $this.subCenturies($value)
     EndFunc
 
-    Func addHour()
-        ;FIXME
+    Func addDay($value = 1)
+        $this.addDays($value)
     EndFunc
 
-    Func addHours()
-        ;FIXME
+    Func addDays($value)
+        $this.add('day', $value)
     EndFunc
 
-    Func addMinute()
-        ;FIXME
+    Func subDay($value = 1)
+        $this.subDays($value)
     EndFunc
 
-    Func addMinutes()
-        ;FIXME
+    Func subDays()
+        $this.addDays(-1 * $value)
     EndFunc
 
-    Func addMonth()
-        ;FIXME
+    Func addHour($value = 1)
+        $this.addHours($value)
     EndFunc
 
-    Func addMonthNoOverflow()
-        ;FIXME
+    Func addHours($value)
+        $this.add('hour', $value)
     EndFunc
 
-    Func addMonths()
-        ;FIXME
+    Func addMinute($value = 1)
+        $this.addMinutes($value)
     EndFunc
 
-    Func addMonthsNoOverflow()
-        ;FIXME
+    Func addMinutes($value)
+        $this.add('second', $value)
     EndFunc
 
-    Func addMonthsWithOverflow()
-        ;FIXME
+    Func addMonth($value = 1)
+        $this.addMonths($value)
     EndFunc
 
-    Func addMonthWithOverflow()
-        ;FIXME
+    Func addMonthNoOverflow($value = 1)
+        $this.addMonthsNoOverflow($value)
     EndFunc
 
-    Func addQuarter()
-        ;FIXME
+    Func addMonths($value)
+        If ($__g_DateTime_yearsOverflow) Then
+            Return $this.addMonthsWithOverflow($value)
+        EndIf
+
+        $this.addMonthsNoOverflow($value)
     EndFunc
 
-    Func addQuarters()
-        ;FIXME
+    Func addMonthsNoOverflow($value)
+        $this.add('month', $value, False)
+    EndFunc
+
+    Func addMonthsWithOverflow($value)
+        $this.add('month', $value, True)
+    EndFunc
+
+    Func addMonthWithOverflow($value = 1)
+        $this.addMonthsWithOverflow($value)
+    EndFunc
+
+    Func addQuarter($value = 1)
+        $this.addQuarters($value)
+    EndFunc
+
+    Func addQuarters($value)
+        $this.addMonths($__g_DateTime_MONTHS_PER_QUARTER * $value)
     EndFunc
 
     Func addRealHour()
@@ -377,52 +437,72 @@ Class DateTime
         ;FIXME
     EndFunc
 
-    Func addSecond()
-        ;FIXME
+    Func addSecond($value = 1)
+        $this.addSeconds($value)
     EndFunc
 
-    Func addSeconds()
-        ;FIXME
+    Func addSeconds($value)
+        $this.add('second', $value)
     EndFunc
 
-    Func addWeek()
-        ;FIXME
+    Func addWeek($value = 1)
+        $this.addWeeks($value)
     EndFunc
 
-    Func addWeeks()
-        ;FIXME
+    Func addWeeks($value)
+        $this.add('week', $value)
     EndFunc
 
-    Func addWeekday()
-        ;FIXME
+    Func subWeek($value = 1)
+        $this.subWeeks($value)
     EndFunc
 
-    Func addWeekdays()
-        ;FIXME
+    Func subWeeks($value)
+        $this.addWeeks(-1 * $value)
     EndFunc
 
-    Func addYear()
-        ;FIXME
+    Func addWeekday($value = 1)
+        $this.addWeekdays($value)
     EndFunc
 
-    Func addYearNoOverflow()
-        ;FIXME
+    Func addWeekdays($value)
+        Return SetError(1, 1, 0)
+        ;FIXME: implement
+        $dow = $this.dayOfWeekIso
+        $offset = $dow < 6 ? 8 - $dow : 0
+        $extraDaysToAdd = Floor($value / 7) * 2
+        $value = $value + $extraDaysToAdd + $offset ;and something with the dow offset
+
+        $this.add('day', $value)
     EndFunc
 
-    Func addYears()
-        ;FIXME
+    Func addYear($value = 1)
+        $this.addYears($value)
     EndFunc
 
-    Func addYearsNoOverflow()
-        ;FIXME
+    Func addYearNoOverflow($value = 1)
+        $this.addYearsNoOverflow($value)
     EndFunc
 
-    Func addYearsWithOverflow()
-        ;FIXME
+    Func addYears($value)
+        If ($__g_DateTime_yearsOverflow) Then
+            Return $this.addYearsWithOverflow($value)
+        EndIf
+
+        $this.addYearsNoOverflow($value)
     EndFunc
 
-    Func addYearWithOverflow()
-        ;FIXME
+    Func addYearsNoOverflow($value)
+        ;$this.addMonthsNoOverflow($value * $__g_DateTime_MONTHS_PER_YEAR)
+        $this.add('year', $value, False)
+    EndFunc
+
+    Func addYearsWithOverflow($value)
+        $this.add('year', $value, True)
+    EndFunc
+
+    Func addYearWithOverflow($value = 1)
+        $this.addYearsWithOverflow($value)
     EndFunc
 
     Func copy()
