@@ -1,0 +1,86 @@
+#AutoIt3Wrapper_Run_AU3Check=N
+
+#include-once
+#include <Date.au3>
+
+Global Const $__g_DayTimeZone_tagDYNAMIC_TIME_ZONE_INFORMATION = "STRUCT;LONG Bias;WCHAR StdName[32];WORD StdDate[8];LONG StdBias;WCHAR DayName[32];WORD DayDate[8];LONG DayBias;WCHAR TimeZoneKeyName[128];BOOLEAN DynamicDaylightTimeDisabled;ENDSTRUCT"
+
+Class DateTimeZone
+    $tz = Null
+
+    Func __construct($timezone = Null)
+        If $timezone = Null Then
+            $this.tz = __DateTimeZone_GetDynamicTimeZoneInformation()
+            Return
+        EndIf
+    EndFunc
+
+    Func getName()
+        ;
+    EndFunc
+
+    Func getOffset()
+        ;
+    EndFunc
+
+    Func FindTimezone()
+        $this.getAvailableTimezones
+    EndFunc
+
+    Func getAvailableTimezones()
+        Local Static $timezones = Null
+        If $timezones = Null Then
+            Local $i = 0
+            Local $iSizeIncrement = 100
+            Local $iSize = $iSizeIncrement
+            Local $_timezones[$iSize]
+            While 1
+                If ($i + 1) >= $iSize Then
+                    $iSize += $iSizeIncrement
+                    Redim $_timezones[$iSize]
+                EndIf
+                $_timezones[$i + 1] = __DateTimeZone_EnumDynamicTimeZoneInformation($i)
+                If @error <> 0 Then ExitLoop
+                $i += 1
+            WEnd
+            $_timezones[0] = $i
+            $timezones = $_timezones
+        EndIf
+
+        Return $timezones
+    EndFunc
+EndClass
+
+Func __DateTimeZone_GetDynamicTimeZoneInformation()
+    Local $tTimeZone = DllStructCreate($__g_DayTimeZone_tagDYNAMIC_TIME_ZONE_INFORMATION)
+    Local $aResult = DllCall("kernel32.dll", "dword", "GetDynamicTimeZoneInformation", "struct*", $tTimeZone)
+    If @error <> 0 Or Not $aResult[0] = 0 Then Return SetError(@error, @extended, 0)
+
+    Local $aInfo[8]
+    $aInfo[0] = $aResult[0]
+    $aInfo[1] = DllStructGetData($tTimeZone, "Bias")
+    $aInfo[2] = DllStructGetData($tTimeZone, "StdName")
+    $aInfo[3] = __Date_Time_CloneSystemTime(DllStructGetPtr($tTimeZone, "StdDate"))
+    $aInfo[4] = DllStructGetData($tTimeZone, "StdBias")
+    $aInfo[5] = DllStructGetData($tTimeZone, "DayName")
+    $aInfo[6] = __Date_Time_CloneSystemTime(DllStructGetPtr($tTimeZone, "DayDate"))
+    $aInfo[7] = DllStructGetData($tTimeZone, "DayBias")
+    Return $aInfo
+EndFunc
+
+Func __DateTimeZone_EnumDynamicTimeZoneInformation($iIndex = 0)
+    Local $tTimeZone = DllStructCreate($__g_DayTimeZone_tagDYNAMIC_TIME_ZONE_INFORMATION)
+    Local $aResult = DllCall("advapi32.dll", "DWORD", "EnumDynamicTimeZoneInformation", "DWORD", $iIndex, "STRUCT*", $tTimeZone)
+    If @error <> 0 Or Not $aResult[0] = 0 Then Return SetError(1, @extended, 0)
+
+    Local $aInfo[8]
+    $aInfo[0] = DllStructGetData($tTimeZone, "DynamicDaylightTimeDisabled"); $aResult[0]
+    $aInfo[1] = DllStructGetData($tTimeZone, "Bias")
+    $aInfo[2] = DllStructGetData($tTimeZone, "StdName")
+    $aInfo[3] = __Date_Time_CloneSystemTime(DllStructGetPtr($tTimeZone, "StdDate"))
+    $aInfo[4] = DllStructGetData($tTimeZone, "StdBias")
+    $aInfo[5] = DllStructGetData($tTimeZone, "DayName")
+    $aInfo[6] = __Date_Time_CloneSystemTime(DllStructGetPtr($tTimeZone, "DayDate"))
+    $aInfo[7] = DllStructGetData($tTimeZone, "DayBias")
+    Return $aInfo
+EndFunc
