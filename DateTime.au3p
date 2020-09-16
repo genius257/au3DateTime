@@ -573,15 +573,174 @@ Class DateTime
         $this.endOfDay()
     EndFunc
 
-    ;FIXME
-    ;startOfDecade
-    ;startOfCentury
-    ;startOfMillennium
-    ;startOfWeek
-    ;startOfHour
-    ;startOfMinute
-    ;startOfSecond
-    ;startOf
+    Func startOfDecade()
+        Local $year = $this.year
+        $year = $year - Mod($year, $__g_DateTime_YEARS_PER_DECADE)
+        $this.setDate($year, 1, 1)
+        $this.startOfDay()
+    EndFunc
+
+    Func endOfDecade()
+        Local $year = $this.year
+        $year = $year - Mod($year, $__g_DateTime_YEARS_PER_DECADE) + $__g_DateTime_YEARS_PER_DECADE - 1
+        $this.setDate($year, 12, 31)
+        $this.endOfDay()
+    EndFunc
+
+    Func startOfCentury()
+        Local $year = $this.year
+        $year = $year - Mod($year - 1, $__g_DateTime_YEARS_PER_CENTURY)
+        $this.setDate($year, 1, 1)
+        $this.startOfDay()
+    EndFunc
+
+    Func endOfCentury()
+        Local $year = $this.year
+        $year = $year - 1 - Mod($year - 1, $__g_DateTime_YEARS_PER_CENTURY) + $__g_DateTime_YEARS_PER_CENTURY
+        $this.setDate($year, 12, 31)
+        $this.endOfDay()
+    EndFunc
+
+    Func startOfMillennium()
+        ;FIXME
+    EndFunc
+
+    Func endOfMillennium()
+        ;FIXME
+    EndFunc
+
+    Func startOfWeek()
+        While (Not $this.dayOfWeek = $__g_DateTime_weekStartsAt)
+            $this.subDay()
+        WEnd
+
+        $this.startOfDay()
+    EndFunc
+
+    Func endOfWeek()
+        While (Not $this.dayOfWeek = $__g_DateTime_weekStartsAt)
+            $this.addDay()
+        WEnd
+
+        $this.endOfDay()
+    EndFunc
+
+    Func startOfHour()
+        $this.setTime($this.hour, 0, 0)
+    EndFunc
+
+    Func endOfHour()
+        $this.setTime($this.hour, 59, 59, 999)
+    EndFunc
+
+    Func startOfMinute()
+        $this.setTime($this.hour, $this.minute, 0)
+    EndFunc
+
+    Func endOfMinute()
+        $this.setTime($this.hour, $this.minute, 59, 999)
+    EndFunc
+
+    Func startOfSecond()
+        ;FIXME
+    EndFunc
+
+    Func endOfSecond()
+        ;FIXME
+    EndFunc
+
+    Func startOf()
+        ;FIXME
+    EndFunc
+
+    Func endOf()
+        ;FIXME
+    EndFunc
+
+    Func midDay()
+        $this.setTime($__g_DateTime_midDayAt, 0, 0)
+    EndFunc
+
+    #cs
+    # Modify to the next occurrence of a given day of the week.
+    # If no dayOfWeek is provided, modify to the next occurrence
+    # of the current day of the week.  Use the supplied constants
+    # to indicate the desired dayOfWeek, ex. static::MONDAY.
+    #
+    # @param int|null $dayOfWeek
+    #ce
+    Func next($dayOfWeek = Null)
+        ;FIXME
+    EndFunc
+
+    Func nextOrPreviousDay($weekday = True, $forward = True)
+        Local $step = $forward ? 1 : -1
+
+        Do
+            $this.addDay($step)
+        Until Not ($weekday ? $this.isWeekend() : $this.isWeekday())
+    EndFunc
+
+    #cs
+    # Go forward to the next weekday.
+    #ce
+    Func nextWeekday()
+        $this.nextOrPreviousDay()
+    EndFunc
+
+    #cs
+    # Go backward to the previous weekday.
+    #ce
+    Func previousWeekday()
+        $this.nextOrPreviousDay(True, False)
+    EndFunc
+
+    #cs
+    # Go forward to the next weekend day.
+    #ce
+    Func nextWeekendDay()
+        $this.nextOrPreviousDay(False)
+    EndFunc
+
+    #cs
+    # Go backward to the previous weekend day.
+    #ce
+    Func previousWeekendDay()
+        $this.nextOrPreviousDay(False, False)
+    EndFunc
+
+    #cs
+    # Modify to the previous occurrence of a given day of the week.
+    # If no dayOfWeek is provided, modify to the previous occurrence
+    # of the current day of the week.  Use the supplied constants
+    # to indicate the desired dayOfWeek, ex. static::MONDAY.
+    #
+    # @param int|null $dayOfWeek
+    #ce
+    Func previous($dayOfWeek = Null)
+        ;FIXME
+    EndFunc
+
+    Func firstOfMonth($dayOfWeek = null)
+        ;FIXME
+    EndFunc
+
+    Func lastOfMonth($dayOfWeek = null)
+        ;FIXME
+    EndFunc
+
+    Func isWeekend()
+        Local $dow = $this.dayOfWeek
+        For $weekendDay In $__g_DateTime_weekendDays
+            If $weekendDay = $dow Then Return True
+        Next
+
+        Return False
+    EndFunc
+
+    Func isWeekday()
+        return Not $this.isWeekend()
+    EndFunc
 
     Func setDateTime($year, $month, $day, $hour, $minute, $second = 0, $milliseconds = 0)
         $this.setDate($year, $month, $day)
@@ -723,14 +882,14 @@ Class DateTime
     Func formatLocalized($format)
         Local $aShards = $this.tsShards()
         Local $tSystTime = DllStructCreate($tagSYSTEMTIME)
-        $tSystTime.Year = $aShards[$__g_DateTime_ts_year]; $this.year
-        $tSystTime.Month = $aShards[$__g_DateTime_ts_month]; $this.month
+        $tSystTime.Year = $aShards[$__g_DateTime_ts_year]
+        $tSystTime.Month = $aShards[$__g_DateTime_ts_month]
         $tSystTime.Dow = $this.dayOfWeek - 1
-        $tSystTime.Day = $aShards[$__g_DateTime_ts_day]; $this.day
-        $tSystTime.Hour = $aShards[$__g_DateTime_ts_hour]; $this.hour
-        $tSystTime.Minute = $aShards[$__g_DateTime_ts_minute]; $this.minute
-        $tSystTime.Second = $aShards[$__g_DateTime_ts_second]; $this.second
-        $tSystTime.MSeconds = $aShards[$__g_DateTime_ts_millisecond]; $this.millisecond
+        $tSystTime.Day = $aShards[$__g_DateTime_ts_day]
+        $tSystTime.Hour = $aShards[$__g_DateTime_ts_hour]
+        $tSystTime.Minute = $aShards[$__g_DateTime_ts_minute]
+        $tSystTime.Second = $aShards[$__g_DateTime_ts_second]
+        $tSystTime.MSeconds = $aShards[$__g_DateTime_ts_millisecond]
         Local $formatted = _WinAPI_GetDateFormat(_WinAPI_GetThreadLocale(), $tSystTime, 0, $format)
         Return SetError(@error, @extended, $formatted)
     EndFunc
