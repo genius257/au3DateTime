@@ -3,28 +3,48 @@
 #include-once
 #include <Date.au3>
 
-Global Const $__g_DayTimeZone_tagDYNAMIC_TIME_ZONE_INFORMATION = "STRUCT;LONG Bias;WCHAR StdName[32];WORD StdDate[8];LONG StdBias;WCHAR DayName[32];WORD DayDate[8];LONG DayBias;WCHAR TimeZoneKeyName[128];BOOLEAN DynamicDaylightTimeDisabled;ENDSTRUCT"
+Global Const $__g_DayTimeZone_tagDYNAMIC_TIME_ZONE_INFORMATION = "STRUCT;LONG Bias;WCHAR StandardName[32];WORD StandardDate[8];LONG StandardBias;WCHAR DaylightName[32];WORD DaylightDate[8];LONG DaylightBias;WCHAR TimeZoneKeyName[128];BOOLEAN DynamicDaylightTimeDisabled;ENDSTRUCT"
 
 Class DateTimeZone
     $tz = Null
+
+    Get Func standardDate()
+        Return __Date_Time_CloneSystemTime(DllStructGetPtr($tTimeZone, "StandardDate"))
+    EndFunc
+
+    Get Func daylightDate()
+        Return __Date_Time_CloneSystemTime(DllStructGetPtr($tTimeZone, "DaylightDate"))
+    EndFunc
 
     Func __construct($timezone = Null)
         If $timezone = Null Then
             $this.tz = __DateTimeZone_GetDynamicTimeZoneInformation()
             Return
         EndIf
+
+        $this.tz = $this.findTimezone($timezone)
+        If $this.tz = Null Then Return SetError(1, 1, 0)
     EndFunc
 
     Func getName()
-        ;
+        Return $this.tz.StandardName
     EndFunc
 
     Func getOffset()
-        ;
+        Return $this.tz.Bias
     EndFunc
 
-    Func FindTimezone()
-        $this.getAvailableTimezones
+    Func findTimezone($name)
+        Local $timezones = $this.getAvailableTimezones()
+        Local $timezone
+        Local $i
+        For $i = 1 To $timezones[0] Step +1
+            $timezone = $timezones[$i]
+            ;If $timezone[2] = $name Then Return $timezone
+            If $timezone.StandardName = $name Then Return $timezone
+        Next
+
+        Return SetError(1, 1, Null)
     EndFunc
 
     Func getAvailableTimezones()
@@ -54,17 +74,18 @@ EndClass
 Func __DateTimeZone_GetDynamicTimeZoneInformation()
     Local $tTimeZone = DllStructCreate($__g_DayTimeZone_tagDYNAMIC_TIME_ZONE_INFORMATION)
     Local $aResult = DllCall("kernel32.dll", "dword", "GetDynamicTimeZoneInformation", "struct*", $tTimeZone)
-    If @error <> 0 Or Not $aResult[0] = 0 Then Return SetError(@error, @extended, 0)
+    If @error <> 0 Or $aResult[0] = 0 Then Return SetError(@error, @extended, 0)
+    Return $tTimeZone
 
     Local $aInfo[8]
-    $aInfo[0] = $aResult[0]
+    $aInfo[0] = DllStructGetData($tTimeZone, "DynamicDaylightTimeDisabled");$aInfo[0] = $aResult[0]
     $aInfo[1] = DllStructGetData($tTimeZone, "Bias")
-    $aInfo[2] = DllStructGetData($tTimeZone, "StdName")
-    $aInfo[3] = __Date_Time_CloneSystemTime(DllStructGetPtr($tTimeZone, "StdDate"))
-    $aInfo[4] = DllStructGetData($tTimeZone, "StdBias")
-    $aInfo[5] = DllStructGetData($tTimeZone, "DayName")
-    $aInfo[6] = __Date_Time_CloneSystemTime(DllStructGetPtr($tTimeZone, "DayDate"))
-    $aInfo[7] = DllStructGetData($tTimeZone, "DayBias")
+    $aInfo[2] = DllStructGetData($tTimeZone, "StandardName")
+    $aInfo[3] = __Date_Time_CloneSystemTime(DllStructGetPtr($tTimeZone, "StandardDate"))
+    $aInfo[4] = DllStructGetData($tTimeZone, "StandardBias")
+    $aInfo[5] = DllStructGetData($tTimeZone, "DaylightName")
+    $aInfo[6] = __Date_Time_CloneSystemTime(DllStructGetPtr($tTimeZone, "DaylightDate"))
+    $aInfo[7] = DllStructGetData($tTimeZone, "DaylightBias")
     Return $aInfo
 EndFunc
 
@@ -72,15 +93,16 @@ Func __DateTimeZone_EnumDynamicTimeZoneInformation($iIndex = 0)
     Local $tTimeZone = DllStructCreate($__g_DayTimeZone_tagDYNAMIC_TIME_ZONE_INFORMATION)
     Local $aResult = DllCall("advapi32.dll", "DWORD", "EnumDynamicTimeZoneInformation", "DWORD", $iIndex, "STRUCT*", $tTimeZone)
     If @error <> 0 Or Not $aResult[0] = 0 Then Return SetError(1, @extended, 0)
+    Return $tTimeZone
 
     Local $aInfo[8]
     $aInfo[0] = DllStructGetData($tTimeZone, "DynamicDaylightTimeDisabled"); $aResult[0]
     $aInfo[1] = DllStructGetData($tTimeZone, "Bias")
-    $aInfo[2] = DllStructGetData($tTimeZone, "StdName")
-    $aInfo[3] = __Date_Time_CloneSystemTime(DllStructGetPtr($tTimeZone, "StdDate"))
-    $aInfo[4] = DllStructGetData($tTimeZone, "StdBias")
-    $aInfo[5] = DllStructGetData($tTimeZone, "DayName")
-    $aInfo[6] = __Date_Time_CloneSystemTime(DllStructGetPtr($tTimeZone, "DayDate"))
-    $aInfo[7] = DllStructGetData($tTimeZone, "DayBias")
+    $aInfo[2] = DllStructGetData($tTimeZone, "StandardName")
+    $aInfo[3] = __Date_Time_CloneSystemTime(DllStructGetPtr($tTimeZone, "StandardDate"))
+    $aInfo[4] = DllStructGetData($tTimeZone, "StandardBias")
+    $aInfo[5] = DllStructGetData($tTimeZone, "DaylightName")
+    $aInfo[6] = __Date_Time_CloneSystemTime(DllStructGetPtr($tTimeZone, "DaylightDate"))
+    $aInfo[7] = DllStructGetData($tTimeZone, "DaylightBias")
     Return $aInfo
 EndFunc
