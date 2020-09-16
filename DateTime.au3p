@@ -4,6 +4,7 @@
 ; https://github.com/forcedotcom/dataloader/blob/master/windows-dependencies/autoit/Include/Date.au3
 #include <Date.au3>
 #include <WinAPILocale.au3>
+#include "DateTimeZone.au3"
 
 Global Const $__g_DateTime_sTsFormat = '%04d-%02d-%02d %02d:%02d:%02d.%03d'
 Global Const $__g_DateTime_sTsPattern = '^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}).(\d{3})$'
@@ -103,13 +104,27 @@ Class DateTime
     EndFunc
 
     Get Func dst()
+        Local $tz = $this.tz
+        If Not $tz.tz.DynamicDaylightTimeDisabled Then Return False
+        Local $aShards = $this.tsShards()
+        Local $tStart = $tz.daylightDate
+        $tStart.Year = $aShards[$__g_DateTime_ts_year]
+        Local $sStart = _Date_Time_SystemTimeToDateTimeStr($tStart, 1)
+        Local $tEnd = $tz.standardDate
+        $tEnd.Year = $aShards[$__g_DateTime_ts_year]
+        Local $sEnd = _Date_Time_SystemTimeToDateTimeStr($tEnd, 1)
+        Local $sDate = StringFormat('%04d/%02d/%02d %02d:%02d:%02d', $aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day], $aShards[$__g_DateTime_ts_hour], $aShards[$__g_DateTime_ts_minute], $aShards[$__g_DateTime_ts_second])
+        $iStart = _DateDiff('s', $sStart, $sDate)
+        $iEnd = _DateDiff('s', $sDate, $sEnd)
+
+        If $iStart < 0 Or $iEnd < 0 Then Return False
+        Return True
+
+        ;_date_isBetween($this.toDateTimeString(), )
+        ;Return $this.isBetween($this.tz.getDstStart(), $this.tz.getDstEnd())
         ;FIXME
         ; GetTimeZoneInformation
         ; https://docs.microsoft.com/en-us/windows/win32/api/timezoneapi/nf-timezoneapi-gettimezoneinformation
-    EndFunc
-
-    Set Func dst()
-        ;FIXME
     EndFunc
 
     Get Func hour()
@@ -272,6 +287,7 @@ Class DateTime
         $ts = $ts == 'now' ? StringFormat($__g_DateTime_sTsFormat, @YEAR, @MON, @MDAY, @HOUR, @MIN, @SEC, @MSEC) : _DateTimeFormat($ts, 0)
 
         $this.ts = $ts
+        $this.tz = DateTimeZone()
     EndFunc
 
     #cs
@@ -584,10 +600,13 @@ Class DateTime
 
     Func setTimeFromTimeString()
         ;FIXME
+        ;_Date_Time_SystemTimeToArray
     EndFunc
 
-    Func setTimezone()
-        ;FIXME
+    Func setTimezone($timezone)
+        Local $tz = DateTimeZone($timezone)
+        If @error <> 0 Then Return SetError(@error, @extended, 0)
+        $this.tz = $tz
     EndFunc
 
     Func toDateString()
@@ -714,5 +733,9 @@ Class DateTime
         $tSystTime.MSeconds = $aShards[$__g_DateTime_ts_millisecond]; $this.millisecond
         Local $formatted = _WinAPI_GetDateFormat(_WinAPI_GetThreadLocale(), $tSystTime, 0, $format)
         Return SetError(@error, @extended, $formatted)
+    EndFunc
+
+    Func isDST()
+        Return $this.dst
     EndFunc
 EndClass
