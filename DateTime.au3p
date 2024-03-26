@@ -133,7 +133,7 @@ Class DateTime
 
     Set Func hour($value)
         Local $aShards = $this.tsShards()
-        $this.setTime($aShards[$value, $aShards[$__g_DateTime_ts_minute], $aShards[$__g_DateTime_ts_second], $aShards[$__g_DateTime_ts_millisecond])
+        $this.setTime($value, $aShards[$__g_DateTime_ts_minute], $aShards[$__g_DateTime_ts_second], $aShards[$__g_DateTime_ts_millisecond])
     EndFunc
 
     Get Func minute()
