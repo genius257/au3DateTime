@@ -528,8 +528,118 @@ Class DateTime
         Return $clone
     EndFunc
 
-    Func format()
-        ;FIXME: implement
+    Func format($format)
+        Local $lastMatchAt = 1, $matchAt = 1, $matches, $result = ""
+        While 1
+            $matches = StringRegExp($format, '(?<!\\)(?:\\\\)*([dDjlNSwzWFmMntLoXxYyaABgGhHisuveIOPpTZcrU])', 1, $lastMatchAt)
+            If @error <> 0 Then ExitLoop
+            $matchAt = @extended
+            $result &= StringMid($format, $lastMatchAt, $matchAt - $lastMatchAt - 1)
+            $lastMatchAt = $matchAt
+            Switch $matches[0]
+                Case 'a'; A and a
+                    ;A: Uppercase Ante meridiem and Post meridiem
+                    ;a: Lowercase Ante meridiem and Post meridiem
+                    $result &= ($matches[0] == 'a' ? StringLower : StringUpper)($this.hour < 12 ? 'am' : 'pm')
+                Case 'B'
+                    ;B: Swatch Internet time
+                    Return SetError(1, 0, 0); FIXME: implement
+                Case 'c'
+                    ;c: ISO 8601 date
+                    Return SetError(1, 0, 0); FIXME: implement tz handling (getTimezone()...)
+                    $result &= StringFormat('%04d-%02d-%02dT%02d:%02d:%02d+%02d:%02d', $this.year, $this.month, $this.day, $this.hour, $this.minute, $this.second);, $this.tzOffsetHours, $this.tzOffsetMinutes)
+                Case 'd'; D and d
+                    ;D: A textual representation of a day, three letters.
+                    ;d: Day of the month, 2 digits with leading zeros.
+                    $result &= $matches[0] == 'd' ? StringFormat('%02d', $this.day) : $this.dayOfWeek
+                Case 'e'
+                    ;e: Timezone identifier
+                    Return SetError(1, 0, 0); FIXME: implement
+                Case 'F'
+                    ;F: A full textual representation of a month, such as January or March.
+                    Return SetError(1, 0, 0); FIXME: implement
+                Case 'g'; G and g
+                    ;g: 12-hour format of an hour without leading zeros
+                    ;G: 24-hour format of an hour without leading zeros
+                    $result &= $matches[0] == 'g' ? Mod($this.hour , 12) : $this.hour
+                Case 'h'; H and h
+                    ;h: 12-hour format of an hour with leading zeros
+                    ;H: 24-hour format of an hour with leading zeros
+                    $result &= StringFormat('%02d', $matches[0] == 'h' ? Mod($this.hour , 12) : $this.hour)
+                Case 'i'; I and i
+                    ;i: Minutes with leading zeros
+                    ;I: Whether or not the date is in daylight saving time
+                    $result &= $matches[0] == 'i' ? StringFormat('%02d', $this.minute) : ($this.isDst() ? 1 : 0)
+                Case 'j'
+                    ;j: Day of the month without leading zeros
+                    $result &= $this.day
+                Case 'l'; L and l
+                    ;l: A full textual representation of the day of the week
+                    ;L: Whether it's a leap year
+                    $result &= $matches[0] == 'l' ? $__g_DateTime_days[$this.dayOfWeek] : ($this.isLeapYear ? 1 : 0)
+                Case 'm'; M and m
+                    ;m: Numeric representation of a month, with leading zeros
+                    ;M: A short textual representation of a month, three letters
+                    If ($matches[0] == 'm') Then
+                        $result &= StringFormat('%02d', $this.month)
+                    Else
+                        Return SetError(1, 0, 0); FIXME: implement
+                    EndIf
+                Case 'n'; N and n
+                    ;n: Numeric representation of a month, without leading zeros
+                    ;N: ISO 8601 numeric representation of the day of the week
+                    $result &= $matches[0] == 'n' ? $this.month : $this.dayOfWeekIso
+                Case 'o'; O and o
+                    ;o: ISO 8601 week-numbering year. This has the same value as Y, except that if the ISO week number (W) belongs to the previous or next year, that year is used instead.
+                    ;O: Difference to Greenwich time (GMT) without colon between hours and minutes
+                    Return SetError(1, 0, 0); FIXME: implement
+                Case 'p'; P and p
+                    ;p: The same as P, but returns Z instead of +00:00 (available as of PHP 8.0.0)
+                    ;P: Difference to Greenwich time (GMT) with colon between hours and minutes
+                    Return SetError(1, 0, 0); FIXME: implement
+                Case 'r'
+                    ;r: » RFC 2822/» RFC 5322 formatted date
+                    Return SetError(1, 0, 0); FIXME: implement
+                Case 's'; S and s
+                    ;S: English ordinal suffix for the day of the month, 2 characters.
+                    ;s: Seconds with leading zeros.
+                    $result &= $matches[0] == 's' ? StringFormat('%02d', $this.second) : $this.daySuffix
+                Case 't'; T and t
+                    ;t: Number of days in the given month
+                    ;T: Timezone abbreviation, if known; otherwise the GMT offset.
+                    Return SetError(1, 0, 0); FIXME: implement
+                Case 'u'; U and u
+                    ;u: Microseconds. Note that date() will always generate 000000 since it takes an int parameter, whereas DateTime::format() does support microseconds if DateTime was created with microseconds.
+                    ;U: Seconds since the Unix Epoch (January 1 1970 00:00:00 GMT)
+                    Return SetError(1, 0, 0); FIXME: implement
+                Case 'v'
+                    ;v: Milliseconds. Same note applies as for u.
+                    $result &= $this.millisecond
+                Case 'w'; W and w
+                    ;w: Numeric representation of the day of the week
+                    ;W: ISO 8601 week number of year, weeks starting on Monday
+                    ;$result &= $matches[0] == 'w' ? $this.dayOfWeek : $this.weekOfYearIso;FIXME: weekofyearISO is not implemented
+                    Local $aShards = $this.tsShards()
+                    $result &= $matches[0] == 'w' ? $this.dayOfWeek : _WeekNumberISO($aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day])
+                Case 'x'; X and x
+                    ;x: An expanded full numeric representation if required, or a standard full numeral representation if possible (like Y). At least four digits. Years BCE are prefixed with a -. Years beyond (and including) 10000 are prefixed by a +.
+                    ;X: An expanded full numeric representation of a year, at least 4 digits, with - for years BCE, and + for years CE.
+                    Return SetError(1, 0, 0); FIXME: implement
+                Case 'y'; Y and y
+                    ;y: A two digit representation of a year
+                    ;Y: A full numeric representation of a year, at least 4 digits, with - for years BCE.
+                    If ($matches[0] == 'y') Then
+                        Return SetError(1, 0, 0); FIXME: implement
+                    Else
+                        $result &= StringFormat('%04d', $this.year)
+                    EndIf
+                Case 'z'; Z and z
+                    ;z: The day of the year (starting from 0)
+                    ;Z: Timezone offset in seconds. The offset for timezones west of UTC is always negative, and for those east of UTC is always positive.
+                    Return SetError(1, 0, 0); FIXME: implement
+            EndSwitch
+        WEnd
+        Return StringRegExpReplace($result&StringMid($format, $lastMatchAt), '\\(.)', '$1')
     EndFunc
 
     Func startOfDay()
