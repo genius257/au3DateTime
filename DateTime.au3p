@@ -194,11 +194,11 @@ Class DateTime
     EndFunc
 
     Get Func utc()
-        ;FIXME
+        Return $this.getOffset() = 0
     EndFunc
 
     Set Func utc()
-        ;FIXME
+        Return SetError(1, 0, 0); READ ONLY
     EndFunc
 
     Get Func weekNumberInMonth()
