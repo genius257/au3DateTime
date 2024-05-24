@@ -867,9 +867,10 @@ Class DateTime
         $this.ts = StringFormat($__g_DateTime_sTsFormat, $aShards[$__g_DateTime_ts_year], $aShards[$__g_DateTime_ts_month], $aShards[$__g_DateTime_ts_day], $hour, $minute, $second, $milliseconds)
     EndFunc
 
-    Func setTimeFromTimeString()
-        ;FIXME
+    Func setTimeFromTimeString($time)
         ;_Date_Time_SystemTimeToArray
+        If StringInStr($time, ':') = 0 Then $time &= ':0'
+        Return $this.modify($time)
     EndFunc
 
     Func setTimezone($timezone)
