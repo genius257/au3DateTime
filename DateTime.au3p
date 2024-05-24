@@ -879,7 +879,7 @@ Class DateTime
     EndFunc
 
     Func toDateString()
-        ;FIXME
+        Return $this.format('Y-m-d')
     EndFunc
 
     Func toDateTimeString()
