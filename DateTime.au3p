@@ -443,8 +443,8 @@ Class DateTime
         $this.addMonths($__g_DateTime_MONTHS_PER_QUARTER * $value)
     EndFunc
 
-    Func addRealHour()
-        ;FIXME
+    Func addRealHour($value = 1)
+        Return $this.addRealHours($value)
     EndFunc
 
     Func addRealHours()
