@@ -463,8 +463,8 @@ Class DateTime
         Return $this.addRealSeconds($value)
     EndFunc
 
-    Func addRealSeconds()
-        ;FIXME
+    Func addRealSeconds($value)
+        Return $this.setTimestamp($this.getTimestamp() + $value)
     EndFunc
 
     Func addSecond($value = 1)
