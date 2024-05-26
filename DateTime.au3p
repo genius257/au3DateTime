@@ -830,7 +830,9 @@ Class DateTime
     # @param int|null $dayOfWeek
     #ce
     Func previous($dayOfWeek = Null)
-        ;FIXME
+        If $dayOfWeek = Null Then $dayOfWeek = $this.dayOfWeek
+
+        Return $this.startOfDay().modify('last '&$__g_DateTime_days[$dayOfWeek])
     EndFunc
 
     Func firstOfMonth($dayOfWeek = null)
