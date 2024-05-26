@@ -732,7 +732,9 @@ Class DateTime
     EndFunc
 
     Func endOfMillennium()
-        ;FIXME
+        Local $year = Mod($this.year - 1 - ($this.year - 1), $__g_DateTime_YEARS_PER_MILLENNIUM + $__g_DateTime_YEARS_PER_MILLENNIUM)
+
+        Return $this.setDate($year, 12, 31).endOfDay()
     EndFunc
 
     Func startOfWeek()
