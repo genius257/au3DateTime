@@ -451,8 +451,8 @@ Class DateTime
         Return $this.addRealMinutes($value * $__g_DateTime_MINUTES_PER_HOUR)
     EndFunc
 
-    Func addRealMinute()
-        ;FIXME
+    Func addRealMinute($value = 1)
+        Return $this.addRealMinutes($value)
     EndFunc
 
     Func addRealMinutes()
