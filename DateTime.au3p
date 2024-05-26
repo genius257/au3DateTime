@@ -844,7 +844,11 @@ Class DateTime
     EndFunc
 
     Func lastOfMonth($dayOfWeek = null)
-        ;FIXME
+        $this.startOfDay()
+
+        If $dayOfWeek = Null Then Return $this.day($this.daysInMonth)
+
+        Return $this.modify('last '&$__g_DateTime_days[$dayOfWeek]&' of '&$this.format('F')&' '&$this.year)
     EndFunc
 
     Func isWeekend()
