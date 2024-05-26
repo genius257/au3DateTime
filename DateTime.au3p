@@ -836,7 +836,11 @@ Class DateTime
     EndFunc
 
     Func firstOfMonth($dayOfWeek = null)
-        ;FIXME
+        $this.startOfDay()
+
+        if $dayOfWeek = Null Then return $this.day(1)
+
+        Return $this.modify('first '&$__g_DateTime_days[$dayOfWeek]&' of '&$this.format('F')&' '&$this.year)
     EndFunc
 
     Func lastOfMonth($dayOfWeek = null)
