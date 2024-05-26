@@ -780,7 +780,9 @@ Class DateTime
     # @param int|null $dayOfWeek
     #ce
     Func next($dayOfWeek = Null)
-        ;FIXME
+        If $dayOfWeek = Null Then $dayOfWeek = $this.dayOfWeek
+
+        return this.startOfDay().modify('next '&$__g_DateTime_days[$dayOfWeek])
     EndFunc
 
     Func nextOrPreviousDay($weekday = True, $forward = True)
