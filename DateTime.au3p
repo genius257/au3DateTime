@@ -459,8 +459,8 @@ Class DateTime
         Return $this.addRealSeconds($value * $__g_DateTime_SECONDS_PER_MINUTE)
     EndFunc
 
-    Func addRealSecond()
-        ;FIXME
+    Func addRealSecond($value = 1)
+        Return $this.addRealSeconds($value)
     EndFunc
 
     Func addRealSeconds()
