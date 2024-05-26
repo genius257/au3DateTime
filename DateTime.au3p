@@ -32,6 +32,20 @@ Global $__g_DateTime_weekendDays = [$__g_DateTime_SATURDAY, $__g_DateTime_SUNDAY
 Global $__g_DateTime_monthsOverflow = True
 Global $__g_DateTime_yearsOverflow = True
 Global $__g_DateTime_midDayAt = 12
+Global $__g_DateTime_days = __g_DateTime_days()
+
+Func __g_DateTime_days()
+    Local $days[]
+    $days[$__g_DateTime_SUNDAY] = 'Sunday'
+    $days[$__g_DateTime_MONDAY] = 'Monday'
+    $days[$__g_DateTime_TUESDAY] = 'Tuesday'
+    $days[$__g_DateTime_WEDNESDAY] = 'Wednesday'
+    $days[$__g_DateTime_THURSDAY] = 'Thursday'
+    $days[$__g_DateTime_FRIDAY] = 'Friday'
+    $days[$__g_DateTime_SATURDAY] = 'Saturday'
+
+    return $days
+EndFunc
 
 Class DateTime
     $ts = Null
