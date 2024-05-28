@@ -903,6 +903,16 @@ Class DateTime
         Return $this.modify($time)
     EndFunc
 
+    Func setTimestamp($timestamp)
+        Local $aShards = $this.tsShards()
+        Local $sDate = _DateAdd('s', $timestamp, '1970/01/01 00:00:00')
+
+        Local $aDate, $aTime
+        _DateTimeSplit($sDate, $aDate, $aTime)
+
+        $this.setDateTime($aDate[1], $aDate[2], $aDate[3], $aTime[1], $aTime[2], $aTime[3], $aShards[$__g_DateTime_ts_millisecond])
+    EndFunc
+
     Func setTimezone($timezone)
         Local $tz = DateTimeZone($timezone)
         If @error <> 0 Then Return SetError(@error, @extended, 0)
