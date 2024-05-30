@@ -387,8 +387,8 @@ Class DateTime
         $this.subDays($value)
     EndFunc
 
-    Func subDays()
-        $this.addDays(-1 * $value)
+    Func subDays($value)
+        Return $this.addDays(-1 * $value)
     EndFunc
 
     Func addHour($value = 1)
