@@ -411,6 +411,10 @@ Class DateTime
         $this.addMonths($value)
     EndFunc
 
+    Func subMonth($value = 1)
+        Return $this.subMonths($value)
+    EndFunc
+
     Func addMonthNoOverflow($value = 1)
         $this.addMonthsNoOverflow($value)
     EndFunc
