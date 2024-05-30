@@ -1,8 +1,9 @@
 # reclassify `.au3p` files as AutoIt:
 *.au3p linguist-language=AutoIt
 
-# mark transpiled file as generated
+# mark transpiled files as generated
 DateTime.au3 linguist-generated
+DateTimeZone.au3 linguist-generated
 
 # Replace any whitespace in the language name with hyphens:
 # *.glyphs linguist-language=OpenStep-Property-List
