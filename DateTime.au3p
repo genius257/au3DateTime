@@ -770,7 +770,7 @@ Class DateTime
     EndFunc
 
     Func startOfMinute()
-        $this.setTime($this.hour, $this.minute, 0)
+        Return $this.setTime($this.hour, $this.minute, 0, 0)
     EndFunc
 
     Func endOfMinute()
