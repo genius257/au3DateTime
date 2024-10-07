@@ -758,7 +758,7 @@ Class DateTime
             $this.addDay()
         WEnd
 
-        $this.endOfDay()
+        Return $this.endOfDay()
     EndFunc
 
     Func startOfHour()
