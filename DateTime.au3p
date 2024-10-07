@@ -750,7 +750,7 @@ Class DateTime
             $this.subDay()
         WEnd
 
-        $this.startOfDay()
+        Return $this.startOfDay()
     EndFunc
 
     Func endOfWeek()
