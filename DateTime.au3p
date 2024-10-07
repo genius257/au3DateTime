@@ -380,7 +380,7 @@ Class DateTime
     EndFunc
 
     Func addDays($value)
-        $this.add('day', $value)
+        Return $this.add('day', $value)
     EndFunc
 
     Func subDay($value = 1)
