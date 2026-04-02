@@ -799,7 +799,7 @@ Class DateTime
     EndFunc
 
     Func startOfSecond()
-        ;FIXME
+        Return $this.setTime($this.hour, $this.minute, $this.second, 0)
     EndFunc
 
     Func endOfSecond(); https://github.com/briannesbitt/Carbon/blob/52474f548a433965fe30ff91bc2c641cdda75885/src/Carbon/Traits/Boundaries.php#L370-L373
