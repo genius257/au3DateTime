@@ -205,11 +205,19 @@ Class DateTime
     EndFunc
 
     Get Func timezone()
-        ;FIXME
+        Return $this.getTimezone()
     EndFunc
 
-    Set Func timezone()
-        ;FIXME
+    Set Func timezone($value)
+        $this.setTimezone($value)
+    EndFunc
+
+    Get Func tz()
+        Return $this.timezone
+    EndFunc
+
+    Set Func tz($value)
+        $this.tz = $value
     EndFunc
 
     Get Func utc()
