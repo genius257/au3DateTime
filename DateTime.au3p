@@ -786,15 +786,15 @@ Class DateTime
         Return $this.setTime($this.hour, 0, 0, 0)
     EndFunc
 
-    Func endOfHour()
+    Func endOfHour(); https://github.com/briannesbitt/Carbon/blob/52474f548a433965fe30ff91bc2c641cdda75885/src/Carbon/Traits/Boundaries.php#L323-L326
         Return $this.setTime($this.hour, $__g_DateTime_MINUTES_PER_HOUR - 1, $__g_DateTime_SECONDS_PER_MINUTE - 1, $__g_DateTime_MICROSECONDS_PER_SECOND - 1)
     EndFunc
 
-    Func startOfMinute()
+    Func startOfMinute(); https://github.com/briannesbitt/Carbon/blob/dd62a58af4e0775a45ea5f99d0363d81b7d9a1e0/src/Carbon/Carbon.php#L4877-L4880
         Return $this.setTime($this.hour, $this.minute, 0, 0)
     EndFunc
 
-    Func endOfMinute()
+    Func endOfMinute(); https://github.com/briannesbitt/Carbon/blob/52474f548a433965fe30ff91bc2c641cdda75885/src/Carbon/Traits/Boundaries.php#L353-L356
         Return $this.setTime($this.hour, $this.minute, $__g_DateTime_SECONDS_PER_MINUTE - 1, $__g_DateTime_MICROSECONDS_PER_SECOND - 1)
     EndFunc
 
