@@ -322,7 +322,7 @@ Class DateTime
         If IsNumber($unit) Then
             Local $tmp = $unit
             $unit = $value
-            $value = $unit
+            $value = $tmp
         EndIf
 
         Local $aShards = $this.tsShards()
