@@ -51,6 +51,11 @@ Class DateTime
     $ts = Null
     $tz = Null
 
+    Set Func ts($value)
+        If Not StringRegExp($value, $__g_DateTime_sTsPattern, 0) Then Return SetError(1, 0, 0)
+        $this.ts = $value
+    EndFunc
+
     Get Func year()
         Return $this.tsShards()[$__g_DateTime_ts_year]
         Return Int(StringMid($this.ts, 1, 4), 1)
