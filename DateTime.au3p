@@ -423,6 +423,10 @@ Class DateTime
         $this.subMonthsNoOverflow($value)
     EndFunc
 
+    Func subMonthsNoOverflow($value)
+        $this.addMonthsNoOverflow(-1 * $value)
+    EndFunc
+
     Func addMonths($value)
         If ($__g_DateTime_yearsOverflow) Then
             Return $this.addMonthsWithOverflow($value)
