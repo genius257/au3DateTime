@@ -802,16 +802,8 @@ Class DateTime
         ;FIXME
     EndFunc
 
-    Func endOfSecond()
-        ;FIXME
-    EndFunc
-
-    Func startOf()
-        ;FIXME
-    EndFunc
-
-    Func endOf()
-        ;FIXME
+    Func endOfSecond(); https://github.com/briannesbitt/Carbon/blob/52474f548a433965fe30ff91bc2c641cdda75885/src/Carbon/Traits/Boundaries.php#L370-L373
+        Return $this.setTime($this.hour, $this.minute, $this.second, $__g_DateTime_MICROSECONDS_PER_SECOND - 1)
     EndFunc
 
     Func midDay()
