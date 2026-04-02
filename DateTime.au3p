@@ -795,7 +795,7 @@ Class DateTime
     EndFunc
 
     Func endOfMinute()
-        $this.setTime($this.hour, $this.minute, 59, 999)
+        Return $this.setTime($this.hour, $this.minute, $__g_DateTime_SECONDS_PER_MINUTE - 1, $__g_DateTime_MICROSECONDS_PER_SECOND - 1)
     EndFunc
 
     Func startOfSecond()
